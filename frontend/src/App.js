@@ -251,39 +251,336 @@ const ProductCard = ({ product }) => {
   );
 };
 
-// Hero Section
+// Hero Section - About Us (matching PDF template)
 const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="min-h-screen flex items-center relative overflow-hidden pt-20" data-testid="hero-section">
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1680209082188-33ba76557259?w=1920&q=80" 
-          alt="Indigenous craft" 
-          className="w-full h-full object-cover opacity-20"
-        />
-      </div>
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 py-24">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+    <section className="pt-24 pb-16 bg-[#FAF8F5]" data-testid="hero-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        {/* About Us Section */}
+        <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
           <div className="animate-fade-in-up">
-            <p className="text-[#C05A42] text-sm font-medium tracking-widest uppercase mb-4">Ethically Sourced • Cruelty Free</p>
-            <h1 className="heading-serif text-5xl sm:text-6xl lg:text-7xl text-[#1A2421] leading-[1.1] tracking-tight">
-              Inducing an Organic Lifestyle through Indigenous Craft
-            </h1>
-            <p className="mt-6 text-lg text-[#4A5D54] max-w-lg leading-relaxed">
-              Ethically sourced, cruelty-free, and crafted using authentic oriental methods by women entrepreneurs across India.
+            <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] mb-6">About us</h2>
+            <p className="text-[#4A5D54] text-lg leading-relaxed mb-8">
+              Gothra is an entrepreneurial arm aiming for peace and non-violence. Here, we gather proletarian women entrepreneurs from different walks of life to promote their indigenous products, thereby inducing an organic lifestyle.
             </p>
-            <Button onClick={() => navigate("/shop")} className="mt-8 bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-14 px-10 text-base" data-testid="shop-collections-btn">
-              Shop Our Collections <ArrowRight className="ml-2" size={18} />
+            <Button onClick={() => navigate("/about")} className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-8" data-testid="learn-more-btn">
+              LEARN MORE
             </Button>
           </div>
-          <div className="hidden md:block animate-fade-in animation-delay-200">
+          <div className="hidden md:block">
             <img 
               src="https://images.unsplash.com/photo-1680209082188-33ba76557259?w=800&q=85" 
-              alt="Handcrafted products" 
-              className="w-full h-[600px] object-cover"
+              alt="Indigenous craft" 
+              className="w-full h-[400px] object-cover"
             />
+          </div>
+        </div>
+
+        {/* Three Pillars */}
+        <div className="grid md:grid-cols-3 gap-8 mb-20">
+          <div className="text-center p-8 bg-white rounded-lg">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+              </svg>
+            </div>
+            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Locally made</h3>
+            <p className="text-[#4A5D54] text-sm leading-relaxed">
+              Our products are crafted using oriental methods without compromising their authenticity.
+            </p>
+          </div>
+          <div className="text-center p-8 bg-white rounded-lg">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Ethically sourced materials</h3>
+            <p className="text-[#4A5D54] text-sm leading-relaxed">
+              Our techniques are cruelty-free, and our materials are purely organic.
+            </p>
+          </div>
+          <div className="text-center p-8 bg-white rounded-lg">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Eco-friendly</h3>
+            <p className="text-[#4A5D54] text-sm leading-relaxed">
+              From the making to the packing, we are committed to the SDG Agenda of 2030
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Jute Curtains Section (matching PDF template)
+const JuteCurtainsSection = () => {
+  const [curtains, setCurtains] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchCurtains = async () => {
+      try {
+        const response = await axios.get(`${API}/products?category=home-decor`);
+        setCurtains(response.data.filter(p => p.subcategory === 'jute-curtains'));
+      } catch (e) {
+        console.error("Failed to fetch curtains:", e);
+      }
+    };
+    fetchCurtains();
+  }, []);
+
+  return (
+    <section className="py-16 bg-[#F3EBE1]" data-testid="jute-curtains-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="text-center mb-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">JUTE CURTAINS</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          {curtains.map((product) => (
+            <div key={product.id} className="bg-white p-4" data-testid={`curtain-${product.id}`}>
+              <div className="aspect-[3/4] overflow-hidden mb-4">
+                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="heading-serif text-xl font-semibold text-[#1A2421]">{product.name}</h3>
+              <p className="text-[#4A5D54] text-sm mt-2 line-clamp-3">{product.description}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()} approx</span>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs" data-testid={`add-curtain-${product.id}`}>
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Planters Section (matching PDF)
+const PlantersSection = () => {
+  const [planters, setPlanters] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchPlanters = async () => {
+      try {
+        const response = await axios.get(`${API}/products?category=home-decor`);
+        setPlanters(response.data.filter(p => p.subcategory === 'planters'));
+      } catch (e) {
+        console.error("Failed to fetch planters:", e);
+      }
+    };
+    fetchPlanters();
+  }, []);
+
+  return (
+    <section className="py-16 bg-[#FAF8F5]" data-testid="planters-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="text-center mb-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">PLANTERS</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          {planters.map((product) => (
+            <div key={product.id} className="bg-white p-4" data-testid={`planter-${product.id}`}>
+              <div className="aspect-square overflow-hidden mb-4">
+                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="heading-serif text-lg font-semibold text-[#1A2421]">{product.name}</h3>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()}</span>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs" data-testid={`add-planter-${product.id}`}>
+                  Add
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Beauty Products Section (matching PDF)
+const BeautyProductsSection = () => {
+  const [products, setProducts] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${API}/products?category=beauty`);
+        setProducts(response.data);
+      } catch (e) {
+        console.error("Failed to fetch beauty products:", e);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  return (
+    <section className="py-16 bg-[#F3EBE1]" data-testid="beauty-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="text-center mb-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">BEAUTY PRODUCTS</h2>
+        </div>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          {products.slice(0, 9).map((product) => (
+            <div key={product.id} className="bg-white p-3 text-center" data-testid={`beauty-${product.id}`}>
+              <div className="aspect-square overflow-hidden mb-3 rounded-lg">
+                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+              <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+              <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-beauty-${product.id}`}>
+                Add
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Herbs & Spices Section (matching PDF)
+const HerbsSpicesSection = () => {
+  const [products, setProducts] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${API}/products?category=pantry`);
+        setProducts(response.data);
+      } catch (e) {
+        console.error("Failed to fetch herbs & spices:", e);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const herbs = products.slice(0, 6);
+  const spices = products.slice(6, 12);
+
+  return (
+    <section className="py-16 bg-[#FAF8F5]" data-testid="herbs-spices-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        {/* Herbs */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">HERBS</h2>
+          </div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {herbs.map((product) => (
+              <div key={product.id} className="bg-white p-3 text-center" data-testid={`herb-${product.id}`}>
+                <div className="aspect-square overflow-hidden mb-3 rounded-lg">
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+                <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+                <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-herb-${product.id}`}>
+                  Add
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Spices */}
+        <div>
+          <div className="text-center mb-12">
+            <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">SPICES</h2>
+          </div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {spices.map((product) => (
+              <div key={product.id} className="bg-white p-3 text-center" data-testid={`spice-${product.id}`}>
+                <div className="aspect-square overflow-hidden mb-3 rounded-lg">
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+                <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+                <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-spice-${product.id}`}>
+                  Add
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Pickles & Punch Section (matching PDF)
+const PicklesPunchSection = () => {
+  const [products, setProducts] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${API}/products?category=kitchen`);
+        setProducts(response.data);
+      } catch (e) {
+        console.error("Failed to fetch pickles:", e);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const pickles = products.filter(p => p.name.toLowerCase().includes('pickle'));
+  const punch = products.filter(p => p.name.toLowerCase().includes('punch') || p.name.toLowerCase().includes('sarbath'));
+
+  return (
+    <section className="py-16 bg-[#F3EBE1]" data-testid="pickles-punch-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        {/* Pickles */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">PICKLES</h2>
+          </div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {pickles.map((product) => (
+              <div key={product.id} className="bg-white p-3 text-center" data-testid={`pickle-${product.id}`}>
+                <div className="aspect-square overflow-hidden mb-3 rounded-lg">
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+                <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+                <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-pickle-${product.id}`}>
+                  Add
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Punch */}
+        <div>
+          <div className="text-center mb-12">
+            <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">PUNCH</h2>
+          </div>
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            {punch.map((product) => (
+              <div key={product.id} className="bg-white p-3 text-center" data-testid={`punch-${product.id}`}>
+                <div className="aspect-square overflow-hidden mb-3 rounded-lg">
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+                <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+                <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-punch-${product.id}`}>
+                  Add
+                </Button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -422,12 +719,15 @@ const Footer = () => (
   </footer>
 );
 
-// Home Page
+// Home Page - matching PDF template layout
 const HomePage = () => (
   <>
     <HeroSection />
-    <CategoriesSection />
-    <AboutSection />
+    <JuteCurtainsSection />
+    <PlantersSection />
+    <BeautyProductsSection />
+    <HerbsSpicesSection />
+    <PicklesPunchSection />
     <ComingSoonSection />
   </>
 );

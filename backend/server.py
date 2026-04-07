@@ -45,6 +45,7 @@ class Product(BaseModel):
     category: str
     image_url: str
     in_stock: bool = True
+    subcategory: Optional[str] = None
 
 class CartItem(BaseModel):
     product_id: str
@@ -84,30 +85,55 @@ class PaymentTransaction(BaseModel):
     items: List[Dict] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-# Products data with correct names and prices from GOTHRA catalog
+# Products data with correct names and prices from GOTHRA catalog PDF
 PRODUCTS = [
-    # Home Decor
-    {"id": "prod-001", "name": "Subtlety - Jute Curtain", "description": "Elegant minimalist jute curtain with natural earthy tones. Perfect for creating a serene and organic living space.", "price": 4999.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1585412727339-54e4bae3bbf9?w=600"},
-    {"id": "prod-002", "name": "Traditions Alive - Jute Curtain", "description": "Traditional jute curtain with brass anklet bead highlights. A beautiful blend of heritage and modern aesthetics.", "price": 5999.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600"},
-    {"id": "prod-003", "name": "Shimmer - Jute Curtain", "description": "Jute curtain with subtle golden shimmer threads. Adds a touch of elegance to any room.", "price": 6499.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1518893883800-45cd0954574b?w=600"},
-    {"id": "prod-004", "name": "Wooden Planter Set", "description": "Handcrafted wooden planters made from sustainable sources. Perfect for indoor plants.", "price": 1299.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1743087367764-052d6483672d?w=600"},
+    # Jute Curtains (Home Decor)
+    {"id": "prod-001", "name": "Subtlety", "description": "100% raw jute, self-embroidered with clay bead highlights available in sheer as well as dimouts. 7ft-2pcs", "price": 4600.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1582609978967-7857a3fa93d8?w=600", "subcategory": "jute-curtains"},
+    {"id": "prod-002", "name": "Traditions Alive", "description": "Cannot think of traditions without the mascot application and brass anklet beads which is more to be experienced surprisingly delightful encounter. What better background than raw jute? 7ft-2pcs", "price": 5999.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1672658553156-97d09a74c801?w=600", "subcategory": "jute-curtains"},
+    {"id": "prod-003", "name": "Shimmer", "description": "Zari borders reminds exotic saris of India. Can be customised in any unique border to match the colour scheme and decor of your space, whether it is formal or homely jute encompass everything. 7ft-2pcs", "price": 2699.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1608094405681-34f3e0d8d66f?w=600", "subcategory": "jute-curtains"},
+    {"id": "prod-004", "name": "Black is Beautiful", "description": "Talk about formals black Satin takes care of it in the most official form. Customisation of change in colour of ribbon (blue, grey, brown) sheer and dim out versions. 7ft-2pcs", "price": 2225.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1746487212486-cc76d7e32877?w=600", "subcategory": "jute-curtains"},
+    {"id": "prod-005", "name": "Colonial Cousins", "description": "Engagement with global influences was always in vogue. It is our responsibility to accommodate and conceive the best from both ends. (Lace and pearl work). 7ft-2pcs", "price": 3499.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1582609978967-7857a3fa93d8?w=600", "subcategory": "jute-curtains"},
+    {"id": "prod-006", "name": "Earths Joy", "description": "Earth the planet with life. Raw jute with terracotta beads and bamboo embellishments is always a joy to be with. One never gets tired off. Panels can be customised. 7ft-2pcs", "price": 4599.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1672658553156-97d09a74c801?w=600", "subcategory": "jute-curtains"},
     
-    # Beauty & Wellness
-    {"id": "prod-005", "name": "Beeswax Lip Balm", "description": "Paraben-free, cruelty-free lip balm made with pure beeswax. Keeps lips soft and hydrated.", "price": 249.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=600"},
-    {"id": "prod-006", "name": "Virgin Coconut Oil", "description": "Cold-pressed virgin coconut oil extracted using authentic oriental methods. Multi-purpose for skin and hair.", "price": 399.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600"},
-    {"id": "prod-007", "name": "Herbal Face Pack", "description": "Natural face pack made from indigenous herbs. Rejuvenates skin and provides natural glow.", "price": 349.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1589810353876-0497a89e5ad1?w=600"},
+    # Planters
+    {"id": "prod-007", "name": "Terrarium", "description": "Handcrafted wooden terrarium planter for indoor plants.", "price": 1999.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1619926833625-cf0a5774d520?w=600", "subcategory": "planters"},
+    {"id": "prod-008", "name": "Tulsi Thara", "description": "Traditional Tulsi planter crafted from wood.", "price": 3999.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1628702112865-77f718dc76e0?w=600", "subcategory": "planters"},
+    {"id": "prod-009", "name": "Wooden Planter", "description": "Simple elegant wooden planter for your green space.", "price": 2500.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1772551935759-0e6137056107?w=600", "subcategory": "planters"},
     
-    # Herbs & Spices
-    {"id": "prod-008", "name": "Blue Tea (Butterfly Pea)", "description": "Organic blue tea from butterfly pea flowers. Rich in antioxidants with a natural blue hue.", "price": 299.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1558160074-4d7d8bdf4256?w=600"},
-    {"id": "prod-009", "name": "Hibiscus Tea", "description": "Sun-dried hibiscus flowers for a refreshing tangy tea. Naturally caffeine-free.", "price": 279.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600"},
-    {"id": "prod-010", "name": "Malabar Tamarind", "description": "Premium quality Malabar tamarind, handpicked and sun-dried. Essential for authentic Kerala cuisine.", "price": 199.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600"},
-    {"id": "prod-011", "name": "Whole Cardamom", "description": "Aromatic green cardamom pods from Kerala hills. Premium quality, intense flavor.", "price": 599.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1643067077447-78239a403a18?w=600"},
+    # Beauty Products
+    {"id": "prod-010", "name": "Beeswax Lip Balm", "description": "Paraben-free, cruelty-free lip balm made with pure beeswax. Keeps lips soft and hydrated.", "price": 140.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=600"},
+    {"id": "prod-011", "name": "Virgin Coconut Oil", "description": "Cold-pressed virgin coconut oil extracted using authentic oriental methods. Multi-purpose for skin and hair.", "price": 359.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600"},
+    {"id": "prod-012", "name": "Herbal Face Pack", "description": "Natural face pack made from indigenous herbs. Rejuvenates skin and provides natural glow.", "price": 300.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1589810353876-0497a89e5ad1?w=600"},
+    {"id": "prod-013", "name": "Kasturi Manjal", "description": "Wild turmeric powder for skin brightening and natural glow.", "price": 210.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=600"},
+    {"id": "prod-014", "name": "Multani Mitti", "description": "Fuller's earth clay for deep cleansing face masks.", "price": 150.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1556229010-aa3f7ff66b24?w=600"},
+    {"id": "prod-015", "name": "Moringa Powder", "description": "Nutrient-rich moringa powder for health and beauty.", "price": 350.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1622070838398-cc06d98c8013?w=600"},
+    {"id": "prod-016", "name": "Henna Powder", "description": "Natural henna powder for hair coloring and conditioning.", "price": 100.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1599751449318-badbee49c598?w=600"},
+    {"id": "prod-017", "name": "Indigo Powder", "description": "Natural indigo powder for achieving dark hair color.", "price": 150.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1608571423539-e951a99e23c5?w=600"},
+    {"id": "prod-018", "name": "Amla Powder", "description": "Indian gooseberry powder for hair growth and health.", "price": 210.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1610478920847-88fcb2d2e299?w=600"},
     
-    # Kitchen Essentials
-    {"id": "prod-012", "name": "Curry Leaf Pickle", "description": "Gourmet pickle made with fresh curry leaves. A unique Kerala delicacy with aromatic spices.", "price": 299.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1573051038546-894db2283a05?w=600"},
-    {"id": "prod-013", "name": "Star Fruit Pickle", "description": "Tangy star fruit pickle made using traditional recipes. Perfect accompaniment for rice dishes.", "price": 329.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1601312317079-71e0e4f5df24?w=600"},
-    {"id": "prod-014", "name": "Nutmeg Pickle", "description": "Rare nutmeg pickle with authentic Kerala spices. A gourmet treat for pickle lovers.", "price": 399.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600"},
-    {"id": "prod-015", "name": "Pomegranate Punch", "description": "Refreshing pomegranate concentrate made from fresh fruits. Perfect for summer drinks.", "price": 449.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1553787499-6f9133860278?w=600"},
+    # Herbs & Spices (Pantry)
+    {"id": "prod-019", "name": "Blue Tea", "description": "Organic blue tea from butterfly pea flowers. Rich in antioxidants with a natural blue hue.", "price": 250.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1558160074-4d7d8bdf4256?w=600"},
+    {"id": "prod-020", "name": "Kappi", "description": "Traditional South Indian coffee powder.", "price": 60.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600"},
+    {"id": "prod-021", "name": "Hibiscus Tea", "description": "Sun-dried hibiscus flowers for a refreshing tangy tea. Naturally caffeine-free.", "price": 250.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600"},
+    {"id": "prod-022", "name": "Turmeric Powder", "description": "Pure organic turmeric powder from Kerala.", "price": 200.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=600"},
+    {"id": "prod-023", "name": "Honey", "description": "Pure wild honey collected from forest beehives.", "price": 599.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600"},
+    {"id": "prod-024", "name": "Cloves", "description": "Aromatic whole cloves from Kerala spice gardens.", "price": 260.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600"},
+    {"id": "prod-025", "name": "Pepper", "description": "Black pepper - the king of spices from Malabar.", "price": 200.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600"},
+    {"id": "prod-026", "name": "Cardamom", "description": "Aromatic green cardamom pods from Kerala hills. Premium quality, intense flavor.", "price": 510.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1643067077447-78239a403a18?w=600"},
+    {"id": "prod-027", "name": "Nutmeg", "description": "Whole nutmeg for authentic Kerala cuisine.", "price": 125.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600"},
+    {"id": "prod-028", "name": "Malabar Tamarind", "description": "Premium quality Malabar tamarind, handpicked and sun-dried. Essential for authentic Kerala cuisine.", "price": 150.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600"},
+    {"id": "prod-029", "name": "Cinnamon", "description": "True Ceylon cinnamon sticks with sweet aroma.", "price": 150.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600"},
+    
+    # Kitchen Essentials (Pickles & Punch)
+    {"id": "prod-030", "name": "Curry Leaf Pickle", "description": "Gourmet pickle made with fresh curry leaves. A unique Kerala delicacy with aromatic spices.", "price": 120.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1573051038546-894db2283a05?w=600"},
+    {"id": "prod-031", "name": "Nutmeg Pickle", "description": "Rare nutmeg pickle with authentic Kerala spices. A gourmet treat for pickle lovers.", "price": 149.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600"},
+    {"id": "prod-032", "name": "Carrot Pickle", "description": "Traditional carrot pickle with Kerala spices.", "price": 129.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1601312317079-71e0e4f5df24?w=600"},
+    {"id": "prod-033", "name": "Star Fruit Pickle", "description": "Tangy star fruit pickle made using traditional recipes. Perfect accompaniment for rice dishes.", "price": 120.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1601312317079-71e0e4f5df24?w=600"},
+    {"id": "prod-034", "name": "Raisins Pickle", "description": "Unique sweet and tangy raisins pickle.", "price": 210.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600"},
+    {"id": "prod-035", "name": "Lime and Dates Pickle", "description": "Sweet and sour lime with dates pickle.", "price": 129.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1573051038546-894db2283a05?w=600"},
+    {"id": "prod-036", "name": "Water Apple Punch", "description": "Refreshing water apple concentrate.", "price": 599.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1553787499-6f9133860278?w=600"},
+    {"id": "prod-037", "name": "Pomegranate Punch", "description": "Refreshing pomegranate concentrate made from fresh fruits. Perfect for summer drinks.", "price": 510.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1553787499-6f9133860278?w=600"},
+    {"id": "prod-038", "name": "Naruneendi Sarbath", "description": "Traditional Kerala herbal drink concentrate.", "price": 130.00, "category": "kitchen", "image_url": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600"},
 ]
 
 # Seed products on startup
