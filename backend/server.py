@@ -306,7 +306,16 @@ async def get_checkout_status(stripe_session_id: str, http_request: Request):
         }
     except Exception as e:
         logger.error(f"Error getting checkout status: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get checkout status")
+        # Check if we have a local transaction record
+        transaction = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id}, {"_id": 0})
+        if transaction:
+            return {
+                "status": transaction.get("status", "pending"),
+                "payment_status": transaction.get("payment_status", "pending"),
+                "amount_total": int(transaction.get("amount", 0) * 100),
+                "currency": transaction.get("currency", "inr")
+            }
+        raise HTTPException(status_code=404, detail="Checkout session not found")
 
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
