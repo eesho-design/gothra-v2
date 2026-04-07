@@ -166,22 +166,30 @@ async def get_cart(session_id: str):
     if not cart:
         return {"session_id": session_id, "items": [], "total": 0}
     
-    # Calculate total and get product details
+    # Calculate total and get product details - batch query for performance
     cart_items = []
     total = 0
-    for item in cart.get("items", []):
-        product = await db.products.find_one({"id": item["product_id"]}, {"_id": 0})
-        if product:
-            item_total = product["price"] * item["quantity"]
-            total += item_total
-            cart_items.append({
-                "product_id": item["product_id"],
-                "name": product["name"],
-                "price": product["price"],
-                "quantity": item["quantity"],
-                "image_url": product["image_url"],
-                "item_total": item_total
-            })
+    
+    # Collect all product IDs and fetch in single query
+    product_ids = [item["product_id"] for item in cart.get("items", [])]
+    if product_ids:
+        products_cursor = db.products.find({"id": {"$in": product_ids}}, {"_id": 0})
+        products_list = await products_cursor.to_list(None)
+        products = {p["id"]: p for p in products_list}
+        
+        for item in cart.get("items", []):
+            product = products.get(item["product_id"])
+            if product:
+                item_total = product["price"] * item["quantity"]
+                total += item_total
+                cart_items.append({
+                    "product_id": item["product_id"],
+                    "name": product["name"],
+                    "price": product["price"],
+                    "quantity": item["quantity"],
+                    "image_url": product["image_url"],
+                    "item_total": item_total
+                })
     
     return {"session_id": session_id, "items": cart_items, "total": total}
 
@@ -248,11 +256,18 @@ async def create_checkout_session(request: CheckoutRequest, http_request: Reques
     if not cart or not cart.get("items"):
         raise HTTPException(status_code=400, detail="Cart is empty")
     
-    # Calculate total
+    # Calculate total - batch query for performance
     total = 0.0
     items_detail = []
+    
+    # Collect all product IDs and fetch in single query
+    product_ids = [item["product_id"] for item in cart["items"]]
+    products_cursor = db.products.find({"id": {"$in": product_ids}}, {"_id": 0})
+    products_list = await products_cursor.to_list(None)
+    products = {p["id"]: p for p in products_list}
+    
     for item in cart["items"]:
-        product = await db.products.find_one({"id": item["product_id"]}, {"_id": 0})
+        product = products.get(item["product_id"])
         if product:
             item_total = product["price"] * item["quantity"]
             total += item_total
