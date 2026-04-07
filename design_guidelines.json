@@ -1,0 +1,94 @@
+{
+  "theme": "light",
+  "archetype": "1_organic_earthy",
+  "design_philosophy": "Earthy, minimalist, 'Surprisingly Delightful'. An organic modern e-commerce experience blending raw natural textures with sleek minimalist structures. Avoid glossy surfaces. Use matte finishes, generous negative space, and a color palette rooted in raw jute, terracotta, and deep forest green.",
+  "colors": {
+    "background_primary": "#FAF8F5",
+    "background_secondary": "#F3EBE1",
+    "text_primary": "#1A2421",
+    "text_secondary": "#4A5D54",
+    "primary": "#1E3F33",
+    "primary_hover": "#152D24",
+    "accent_terracotta": "#C05A42",
+    "surface_card": "#FFFFFF",
+    "border_light": "#EAD8C3"
+  },
+  "typography": {
+    "heading_font": "Cormorant Garamond",
+    "body_font": "Manrope",
+    "heading_weights": [400, 500, 600, 700],
+    "body_weights": [300, 400, 500],
+    "font_imports": "@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500&display=swap');",
+    "h1": "text-5xl sm:text-6xl md:text-7xl tracking-tighter leading-none font-medium",
+    "h2": "text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight font-medium",
+    "h3": "text-2xl sm:text-3xl tracking-tight",
+    "body": "text-base leading-relaxed tracking-normal"
+  },
+  "layout": {
+    "spacing_scale": "generous",
+    "container_max_width": "max-w-7xl mx-auto px-6 md:px-12",
+    "section_padding": "py-24 md:py-32",
+    "card_radius": "rounded-none",
+    "button_radius": "rounded-full"
+  },
+  "components_strategy": {
+    "navigation": "Sticky/fixed header using backdrop-blur-xl and bg-[#FAF8F5]/80. Ensure high contrast text. Include GOTHRA logo (text-based Serif), key links, and cart icon. data-testid='nav-header'.",
+    "hero": "Full height or min-h-[85vh]. Layout: Asymmetric. Left side: Large typography 'Inducing an Organic Lifestyle through Indigenous Craft'. Right side: Hero image with slight parallax. Background: #FAF8F5.",
+    "product_cards": "Minimalist rectangular. Image takes up 80% of height. On hover: Image scales slightly (1.05), and an overlay reveals the 'Price' and 'Add to Cart' button. data-testid='product-card'.",
+    "categories_grid": "Bento-style Grid (Mode A: Tetris). Mix of tall, wide, and square image blocks for Home Decor, Beauty & Wellness, Herbs & Spices, Kitchen Essentials.",
+    "about_section": "Editorial layout. Large portrait image of a woman artisan intersecting with a text block describing the entrepreneurial arm for proletarian women. Use terracotta accent.",
+    "coming_soon_teaser": "Darker, moody section (Deep Forest Green #1E3F33 background). Misty tea garden image with opacity. Text: 'Coming Soon - Seven Sisters Collection'. Use subtle reveal animation.",
+    "footer": "Generous spacing (py-24). Deep Forest Green background, Bone White text. Contact info (Trivandrum), elegant newsletter input."
+  },
+  "motion_and_interactions": {
+    "scroll": "Smooth scrolling (lenis recommended).",
+    "hover_states": "Product cards: reveal pricing/CTA on hover. Images: scale-105 duration-700 ease-out.",
+    "page_load": "Staggered fade-up for typography and grid items using framer-motion."
+  },
+  "image_urls": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1680209082188-33ba76557259?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjd8MHwxfHNlYXJjaHwxfHxpbmRpZ2Vub3VzJTIwY3JhZnQlMjBqdXRlJTIwdGVycmFjb3R0YXxlbnwwfHx8fDE3NzU1NTM2MDJ8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Close up of highly textured woven baskets. Use as a large hero visual or subtle background texture.",
+      "category": "hero"
+    },
+    "category_home_decor": {
+      "url": "https://images.unsplash.com/photo-1743087367764-052d6483672d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBwbGFudGVyJTIwanV0ZXxlbnwwfHx8fDE3NzU1NTM1ODl8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Potted plants. Represents wooden planters and jute home decor.",
+      "category": "product_category"
+    },
+    "category_beauty_wellness": {
+      "url": "https://images.unsplash.com/photo-1589810353876-0497a89e5ad1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwxfHxvcmdhbmljJTIwc2tpbmNhcmUlMjBjb2NvbnV0JTIwb2lsfGVufDB8fHx8MTc3NTU1MzU4OXww&ixlib=rb-4.1.0&q=85",
+      "description": "Ceramic bowls/skincare context. Represents organic skincare, coconut oil, face packs.",
+      "category": "product_category"
+    },
+    "category_herbs_spices": {
+      "url": "https://images.unsplash.com/photo-1643067077447-78239a403a18?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODh8MHwxfHNlYXJjaHwyfHxoZXJiYWwlMjB0ZWElMjBzcGljZXN8ZW58MHx8fHwxNzc1NTUzNTg5fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Cup of tea with spices and cinnamon. Represents blue tea, hibiscus, cardamom.",
+      "category": "product_category"
+    },
+    "category_kitchen_essentials": {
+      "url": "https://images.unsplash.com/photo-1573051038546-894db2283a05?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwxfHxwaWNrbGVzJTIwaW4lMjBnbGFzcyUyMGphciUyMHJ1c3RpY3xlbnwwfHx8fDE3NzU1NTM2MDF8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Jars on rustic background. Represents gourmet pickles.",
+      "category": "product_category"
+    },
+    "about_us_artisan": {
+      "url": "https://images.unsplash.com/photo-1768729340668-9b609873e796?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjB2aWxsYWdlJTIwd29tYW4lMjBhcnRpc2FufGVufDB8fHx8MTc3NTU1MzYwMXww&ixlib=rb-4.1.0&q=85",
+      "description": "Elderly woman grinding spices. Represents proletarian women entrepreneurs.",
+      "category": "about"
+    },
+    "teaser_seven_sisters": {
+      "url": "https://images.unsplash.com/photo-1765418933180-bc86d212ab88?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwxfHxtaXN0eSUyMHRlYSUyMGdhcmRlbiUyMGluZGlhfGVufDB8fHx8MTc3NTU1MzYxM3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Misty tea plantation. Represents North-East India collection teaser.",
+      "category": "teaser"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Ensure 'Cormorant Garamond' and 'Manrope' fonts are properly loaded and applied globally via Tailwind in the frontend project.",
+    "Implement a clean, grid-based shopping cart and Stripe checkout integration. Do not clutter the checkout.",
+    "Product cards MUST have a smooth hover interaction: hide price initially or show an overlay, and on hover, smoothly display the price and an 'Add to Cart' button.",
+    "Navigation must be sticky with a backdrop-blur.",
+    "Add 'data-testid' to all buttons, navigation links, and product cards.",
+    "Footer must display 'Trivandrum' as the store address clearly.",
+    "Use only the provided image URLs. Do not use placeholders."
+  ]
+}
