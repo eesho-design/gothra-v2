@@ -256,10 +256,20 @@ const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="pt-24 pb-16 bg-[#FAF8F5]" data-testid="hero-section">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+    <section className="pt-24 pb-16 relative min-h-[90vh]" data-testid="hero-section">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" 
+          alt="GOTHRA Background" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[#FAF8F5]/75"></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         {/* About Us Section */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+        <div className="grid md:grid-cols-2 gap-12 items-center mb-20 pt-12">
           <div className="animate-fade-in-up">
             <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] mb-6">About us</h2>
             <p className="text-[#4A5D54] text-lg leading-relaxed mb-8">
@@ -269,13 +279,7 @@ const HeroSection = () => {
               LEARN MORE
             </Button>
           </div>
-          <div className="hidden md:block">
-            <img 
-              src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" 
-              alt="GOTHRA - Indigenous Jute Craft" 
-              className="w-full h-[400px] object-cover"
-            />
-          </div>
+          <div className="hidden md:block"></div>
         </div>
 
         {/* Three Pillars */}
