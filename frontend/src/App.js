@@ -251,12 +251,12 @@ const ProductCard = ({ product }) => {
   );
 };
 
-// Hero Section - About Us (matching PDF template)
+// Hero Section - Clean with background image
 const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="pt-24 pb-16 relative min-h-[90vh]" data-testid="hero-section">
+    <section className="pt-20 relative min-h-[85vh] flex items-center" data-testid="hero-section">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -264,64 +264,71 @@ const HeroSection = () => {
           alt="GOTHRA Background" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-[#FAF8F5]/75"></div>
+        <div className="absolute inset-0 bg-[#1A2421]/30"></div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        {/* About Us Section */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-20 pt-12">
-          <div className="animate-fade-in-up">
-            <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] mb-6">About us</h2>
-            <p className="text-[#4A5D54] text-lg leading-relaxed mb-8">
-              Gothra is an entrepreneurial arm aiming for peace and non-violence. Here, we gather proletarian women entrepreneurs from different walks of life to promote their indigenous products, thereby inducing an organic lifestyle.
-            </p>
-            <Button onClick={() => navigate("/about")} className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-8" data-testid="learn-more-btn">
-              LEARN MORE
-            </Button>
-          </div>
-          <div className="hidden md:block"></div>
-        </div>
-
-        {/* Three Pillars */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
-          <div className="text-center p-8 bg-white rounded-lg">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-              </svg>
-            </div>
-            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Locally made</h3>
-            <p className="text-[#4A5D54] text-sm leading-relaxed">
-              Our products are crafted using oriental methods without compromising their authenticity.
-            </p>
-          </div>
-          <div className="text-center p-8 bg-white rounded-lg">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Ethically sourced materials</h3>
-            <p className="text-[#4A5D54] text-sm leading-relaxed">
-              Our techniques are cruelty-free, and our materials are purely organic.
-            </p>
-          </div>
-          <div className="text-center p-8 bg-white rounded-lg">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Eco-friendly</h3>
-            <p className="text-[#4A5D54] text-sm leading-relaxed">
-              From the making to the packing, we are committed to the SDG Agenda of 2030
-            </p>
-          </div>
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 text-center">
+        <h1 className="heading-serif text-5xl md:text-7xl text-white mb-6 animate-fade-in-up">
+          Inducing an Organic Lifestyle
+        </h1>
+        <p className="text-white/90 text-xl md:text-2xl max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-100">
+          Through Indigenous Craft
+        </p>
+        <div className="flex gap-4 justify-center animate-fade-in-up animation-delay-200">
+          <Button onClick={() => navigate("/shop")} className="bg-white text-[#1A2421] hover:bg-[#F3EBE1] rounded-full px-10 h-14 text-base font-medium" data-testid="shop-now-btn">
+            Shop Now
+          </Button>
+          <Button onClick={() => navigate("/about")} variant="outline" className="border-white text-white hover:bg-white/10 rounded-full px-10 h-14 text-base font-medium" data-testid="learn-more-btn">
+            Learn More
+          </Button>
         </div>
       </div>
     </section>
   );
 };
+
+// Three Pillars Section - for homepage
+const ThreePillarsSection = () => (
+  <section className="py-20 bg-[#FAF8F5]" data-testid="pillars-section">
+    <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="text-center p-8 bg-white rounded-lg">
+          <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+            </svg>
+          </div>
+          <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Locally made</h3>
+          <p className="text-[#4A5D54] text-sm leading-relaxed">
+            Our products are crafted using oriental methods without compromising their authenticity.
+          </p>
+        </div>
+        <div className="text-center p-8 bg-white rounded-lg">
+          <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Ethically sourced materials</h3>
+          <p className="text-[#4A5D54] text-sm leading-relaxed">
+            Our techniques are cruelty-free, and our materials are purely organic.
+          </p>
+        </div>
+        <div className="text-center p-8 bg-white rounded-lg">
+          <div className="w-16 h-16 mx-auto mb-4 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Eco-friendly</h3>
+          <p className="text-[#4A5D54] text-sm leading-relaxed">
+            From the making to the packing, we are committed to the SDG Agenda of 2030
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
 // Jute Curtains Section (matching PDF template)
 const JuteCurtainsSection = () => {
@@ -727,6 +734,7 @@ const Footer = () => (
 const HomePage = () => (
   <>
     <HeroSection />
+    <ThreePillarsSection />
     <JuteCurtainsSection />
     <PlantersSection />
     <BeautyProductsSection />
@@ -825,9 +833,73 @@ const CategoryPage = () => {
   );
 };
 
-// About Page
+// About Page - Full About Us content
 const AboutPage = () => (
-  <div className="pt-28 pb-24" data-testid="about-page">
+  <div className="pt-20" data-testid="about-page">
+    {/* Hero Banner */}
+    <section className="relative h-[40vh] flex items-center justify-center">
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" 
+          alt="GOTHRA" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[#1A2421]/50"></div>
+      </div>
+      <h1 className="heading-serif text-5xl md:text-6xl text-white relative z-10">About Us</h1>
+    </section>
+
+    {/* About Content */}
+    <section className="py-20 bg-[#FAF8F5]">
+      <div className="max-w-4xl mx-auto px-6 md:px-12 text-center">
+        <p className="text-[#4A5D54] text-xl leading-relaxed">
+          Gothra is an entrepreneurial arm aiming for peace and non-violence. Here, we gather proletarian women entrepreneurs from different walks of life to promote their indigenous products, thereby inducing an organic lifestyle.
+        </p>
+      </div>
+    </section>
+
+    {/* Three Pillars */}
+    <section className="py-20 bg-[#F3EBE1]">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center p-8 bg-white rounded-lg">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[#FAF8F5] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+              </svg>
+            </div>
+            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Locally made</h3>
+            <p className="text-[#4A5D54] text-sm leading-relaxed">
+              Our products are crafted using oriental methods without compromising their authenticity.
+            </p>
+          </div>
+          <div className="text-center p-8 bg-white rounded-lg">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[#FAF8F5] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Ethically sourced materials</h3>
+            <p className="text-[#4A5D54] text-sm leading-relaxed">
+              Our techniques are cruelty-free, and our materials are purely organic.
+            </p>
+          </div>
+          <div className="text-center p-8 bg-white rounded-lg">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[#FAF8F5] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="heading-serif text-xl font-semibold text-[#1A2421] mb-3">Eco-friendly</h3>
+            <p className="text-[#4A5D54] text-sm leading-relaxed">
+              From the making to the packing, we are committed to the SDG Agenda of 2030
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Mission Section */}
     <AboutSection />
     <ComingSoonSection />
   </div>
