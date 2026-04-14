@@ -742,7 +742,7 @@ const HomeAboutSection = () => (
   </section>
 );
 
-// Home Products Section
+// Home Products Section - Organized by categories
 const HomeProductsSection = () => {
   const [products, setProducts] = useState([]);
   const { addToCart } = useCart();
@@ -759,35 +759,125 @@ const HomeProductsSection = () => {
     fetchProducts();
   }, []);
 
-  return (
-    <section className="py-20 bg-[#F3EBE1]" data-testid="home-products-section">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="text-center mb-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">Our Products</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {products.slice(0, 12).map((product) => (
-            <div key={product.id} className="bg-white p-3 text-center" data-testid={`home-product-${product.id}`}>
-              <div className="aspect-square overflow-hidden mb-3">
-                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-              </div>
-              <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
-              <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
-              <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-home-${product.id}`}>
-                Add
-              </Button>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-10">
-          <Link to="/shop">
-            <Button className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-10 h-12">
-              View All Products
-            </Button>
-          </Link>
-        </div>
+  const juteCurtains = products.filter(p => p.subcategory === 'jute-curtains');
+  const planters = products.filter(p => p.subcategory === 'planters');
+  const beautyProducts = products.filter(p => p.category === 'beauty');
+  const herbs = products.filter(p => p.category === 'pantry').slice(0, 6);
+  const spices = products.filter(p => p.category === 'pantry').slice(6);
+  const pickles = products.filter(p => p.category === 'kitchen' && p.name.toLowerCase().includes('pickle'));
+  const punch = products.filter(p => p.category === 'kitchen' && (p.name.toLowerCase().includes('punch') || p.name.toLowerCase().includes('sarbath')));
+
+  const ProductCard = ({ product }) => (
+    <div className="bg-white p-3 text-center" data-testid={`product-${product.id}`}>
+      <div className="aspect-square overflow-hidden mb-3">
+        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
       </div>
-    </section>
+      <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+      <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+      <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full">
+        Add
+      </Button>
+    </div>
+  );
+
+  return (
+    <div data-testid="home-products-section">
+      {/* Jute Curtains */}
+      <section className="py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">JUTE CURTAINS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {juteCurtains.map((product) => (
+              <div key={product.id} className="bg-white p-4">
+                <div className="aspect-[3/4] overflow-hidden mb-4">
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+                <h3 className="heading-serif text-xl font-semibold text-[#1A2421]">{product.name}</h3>
+                <p className="text-[#4A5D54] text-sm mt-2 line-clamp-2">{product.description}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()} approx</span>
+                  <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs">
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Planters */}
+      <section className="py-16 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">PLANTERS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {planters.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Beauty Products */}
+      <section className="py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">BEAUTY PRODUCTS</h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {beautyProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Herbs */}
+      <section className="py-16 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">HERBS</h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {herbs.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Spices */}
+      <section className="py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">SPICES</h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {spices.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pickles */}
+      <section className="py-16 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">PICKLES</h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            {pickles.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Punch */}
+      <section className="py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">PUNCH</h2>
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            {punch.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 
