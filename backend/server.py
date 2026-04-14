@@ -101,7 +101,7 @@ PRODUCTS = [
     {"id": "prod-009", "name": "Wooden Planter", "description": "Simple elegant wooden planter for your green space.", "price": 2500.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1772551935759-0e6137056107?w=600", "subcategory": "planters"},
     
     # Beauty Products
-    {"id": "prod-010", "name": "Beeswax Lip Balm", "description": "Paraben-free, cruelty-free lip balm made with pure beeswax. Keeps lips soft and hydrated.", "price": 140.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=600"},
+    {"id": "prod-010", "name": "Beeswax Lip Balm", "description": "Paraben-free, cruelty-free lip balm made with pure beeswax. Keeps lips soft and hydrated.", "price": 140.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/tt36c8nh_Beeswax%20Lip%20Balm.png"},
     {"id": "prod-011", "name": "Virgin Coconut Oil", "description": "Cold-pressed virgin coconut oil extracted using authentic oriental methods. Multi-purpose for skin and hair.", "price": 359.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600"},
     {"id": "prod-012", "name": "Herbal Face Pack", "description": "Natural face pack made from indigenous herbs. Rejuvenates skin and provides natural glow.", "price": 300.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1589810353876-0497a89e5ad1?w=600"},
     {"id": "prod-013", "name": "Kasturi Manjal", "description": "Wild turmeric powder for skin brightening and natural glow.", "price": 210.00, "category": "beauty", "image_url": "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=600"},
