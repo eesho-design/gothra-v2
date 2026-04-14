@@ -751,9 +751,9 @@ const HomeAboutSection = () => (
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div>
           <img 
-            src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/di2od5vi_Screenshot%202026-04-14%20184653.png" 
-            alt="GOTHRA Store" 
-            className="w-full h-[500px] object-cover"
+            src="/store-interior-large.jpeg" 
+            alt="GOTHRA Store Interior" 
+            className="w-full h-[600px] object-cover"
           />
         </div>
         <div>
