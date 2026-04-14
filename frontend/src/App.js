@@ -251,31 +251,17 @@ const ProductCard = ({ product }) => {
   );
 };
 
-// Hero Section - Clean with background image
+// Hero Section - Clean with background image only
 const HeroSection = () => {
-  const navigate = useNavigate();
-
   return (
-    <section className="pt-20 relative min-h-[85vh] flex items-center" data-testid="hero-section">
-      {/* Background Image */}
+    <section className="pt-20 relative min-h-[85vh]" data-testid="hero-section">
+      {/* Background Image - No overlay content */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" 
-          alt="GOTHRA Background" 
+          alt="GOTHRA" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-[#1A2421]/30"></div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 text-center">
-        <div className="flex gap-4 justify-center animate-fade-in-up">
-          <Button onClick={() => navigate("/shop")} className="bg-white text-[#1A2421] hover:bg-[#F3EBE1] rounded-full px-10 h-14 text-base font-medium" data-testid="shop-now-btn">
-            Shop Now
-          </Button>
-          <Button onClick={() => navigate("/about")} variant="outline" className="border-white text-white hover:bg-white/10 rounded-full px-10 h-14 text-base font-medium" data-testid="learn-more-btn">
-            Learn More
-          </Button>
-        </div>
       </div>
     </section>
   );
