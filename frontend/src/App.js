@@ -268,13 +268,7 @@ const HeroSection = () => {
       </div>
       
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 text-center">
-        <h1 className="heading-serif text-5xl md:text-7xl text-white mb-6 animate-fade-in-up">
-          Inducing an Organic Lifestyle
-        </h1>
-        <p className="text-white/90 text-xl md:text-2xl max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-100">
-          Through Indigenous Craft
-        </p>
-        <div className="flex gap-4 justify-center animate-fade-in-up animation-delay-200">
+        <div className="flex gap-4 justify-center animate-fade-in-up">
           <Button onClick={() => navigate("/shop")} className="bg-white text-[#1A2421] hover:bg-[#F3EBE1] rounded-full px-10 h-14 text-base font-medium" data-testid="shop-now-btn">
             Shop Now
           </Button>
