@@ -123,9 +123,9 @@ const Header = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-10">
             <Link to="/" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-home">Home</Link>
-            <Link to="/category/beauty" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-beauty">Beauty</Link>
-            <Link to="/category/home-decor" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-decor">Decor</Link>
-            <Link to="/about" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-mission">Our Mission</Link>
+            <Link to="/about" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-about">About Us</Link>
+            <Link to="/contact" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-contact">Contact Us</Link>
+            <Link to="/shop" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-products">Products</Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -141,9 +141,9 @@ const Header = () => {
           <div className="md:hidden absolute top-20 left-0 right-0 bg-[#FAF8F5] border-t border-[#EAD8C3] py-6 px-6 animate-fade-in">
             <div className="flex flex-col gap-4">
               <Link to="/" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-              <Link to="/category/beauty" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Beauty</Link>
-              <Link to="/category/home-decor" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Decor</Link>
-              <Link to="/about" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Our Mission</Link>
+              <Link to="/about" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
+              <Link to="/contact" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Contact Us</Link>
+              <Link to="/shop" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Products</Link>
             </div>
           </div>
         )}
@@ -1000,6 +1000,54 @@ const AboutPage = () => (
   </div>
 );
 
+// Contact Page
+const ContactPage = () => (
+  <div className="pt-20 min-h-screen" data-testid="contact-page">
+    <section className="py-20 bg-[#1E3F33] text-[#FAF8F5]">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="grid md:grid-cols-2 gap-12">
+          <div>
+            <h1 className="heading-serif text-5xl md:text-6xl mb-6">Contact Us</h1>
+            <p className="text-[#F3EBE1]/80 leading-relaxed mb-8">
+              Visit our store or reach out to us for inquiries about our indigenous, organic products.
+            </p>
+          </div>
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <MapPin size={24} className="mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-medium mb-1">Store Address</h3>
+                <p className="text-[#F3EBE1]/80">EVRA 508, Nandanam Lane, Vazhuthacaud, Trivandrum-695014</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Phone size={24} />
+              <div>
+                <h3 className="font-medium mb-1">Phone</h3>
+                <a href="tel:+919446014710" className="text-[#F3EBE1]/80 hover:text-white transition-colors">+91 9446014710</a>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Mail size={24} />
+              <div>
+                <h3 className="font-medium mb-1">Email</h3>
+                <a href="mailto:7gothra@gmail.com" className="text-[#F3EBE1]/80 hover:text-white transition-colors">7gothra@gmail.com</a>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Instagram size={24} />
+              <div>
+                <h3 className="font-medium mb-1">Instagram</h3>
+                <a href="https://instagram.com/_GOTHRA" target="_blank" rel="noopener noreferrer" className="text-[#F3EBE1]/80 hover:text-white transition-colors">@_GOTHRA</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
 // Checkout Success Page
 const CheckoutSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -1111,6 +1159,7 @@ function App() {
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/category/:category" element={<CategoryPage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
             </Routes>
           </main>
