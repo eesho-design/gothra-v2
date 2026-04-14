@@ -708,18 +708,133 @@ const Footer = () => (
   </footer>
 );
 
-// Home Page - matching PDF template layout
+// Home Page - Clean layout with About Us, Products, and Contact
 const HomePage = () => (
   <>
     <HeroSection />
-    <ThreePillarsSection />
-    <JuteCurtainsSection />
-    <PlantersSection />
-    <BeautyProductsSection />
-    <HerbsSpicesSection />
-    <PicklesPunchSection />
-    <ComingSoonSection />
+    <HomeAboutSection />
+    <HomeProductsSection />
+    <HomeContactSection />
   </>
+);
+
+// Home About Us Section
+const HomeAboutSection = () => (
+  <section className="py-20 bg-[#FAF8F5]" data-testid="home-about-section">
+    <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <img 
+            src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/di2od5vi_Screenshot%202026-04-14%20184653.png" 
+            alt="GOTHRA Store" 
+            className="w-full h-auto object-contain"
+          />
+        </div>
+        <div>
+          <Link to="/shop">
+            <Button className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-10 h-12">
+              Shop Now
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// Home Products Section
+const HomeProductsSection = () => {
+  const [products, setProducts] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${API}/products`);
+        setProducts(response.data);
+      } catch (e) {
+        console.error("Failed to fetch products:", e);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  return (
+    <section className="py-20 bg-[#F3EBE1]" data-testid="home-products-section">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="text-center mb-12">
+          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421]">Our Products</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {products.slice(0, 12).map((product) => (
+            <div key={product.id} className="bg-white p-3 text-center" data-testid={`home-product-${product.id}`}>
+              <div className="aspect-square overflow-hidden mb-3">
+                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+              <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
+              <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full" data-testid={`add-home-${product.id}`}>
+                Add
+              </Button>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-10">
+          <Link to="/shop">
+            <Button className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-10 h-12">
+              View All Products
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Home Contact Section
+const HomeContactSection = () => (
+  <section className="py-20 bg-[#1E3F33] text-[#FAF8F5]" data-testid="home-contact-section">
+    <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="grid md:grid-cols-2 gap-12">
+        <div>
+          <h2 className="heading-serif text-4xl md:text-5xl mb-6">Contact Us</h2>
+          <p className="text-[#F3EBE1]/80 leading-relaxed mb-8">
+            Visit our store or reach out to us for inquiries about our indigenous, organic products.
+          </p>
+        </div>
+        <div className="space-y-6">
+          <div className="flex items-start gap-4">
+            <MapPin size={24} className="mt-1 flex-shrink-0" />
+            <div>
+              <h3 className="font-medium mb-1">Store Address</h3>
+              <p className="text-[#F3EBE1]/80">EVRA 508, Nandanam Lane, Vazhuthacaud, Trivandrum-695014</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Phone size={24} />
+            <div>
+              <h3 className="font-medium mb-1">Phone</h3>
+              <a href="tel:+919446014710" className="text-[#F3EBE1]/80 hover:text-white transition-colors">+91 9446014710</a>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Mail size={24} />
+            <div>
+              <h3 className="font-medium mb-1">Email</h3>
+              <a href="mailto:7gothra@gmail.com" className="text-[#F3EBE1]/80 hover:text-white transition-colors">7gothra@gmail.com</a>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Instagram size={24} />
+            <div>
+              <h3 className="font-medium mb-1">Instagram</h3>
+              <a href="https://instagram.com/_GOTHRA" target="_blank" rel="noopener noreferrer" className="text-[#F3EBE1]/80 hover:text-white transition-colors">@_GOTHRA</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 );
 
 // Shop Page
