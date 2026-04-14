@@ -97,7 +97,7 @@ PRODUCTS = [
     
     # Planters
     {"id": "prod-007", "name": "Terrarium", "description": "Handcrafted wooden terrarium planter with candle holder. Perfect for indoor plants.", "price": 1999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/q3llc4nq_Screenshot%202025-10-15%20220940.png", "subcategory": "planters"},
-    {"id": "prod-008", "name": "Tulsi Thara", "description": "Traditional Tulsi planter crafted from wood.", "price": 3999.00, "category": "home-decor", "image_url": "https://images.unsplash.com/photo-1628702112865-77f718dc76e0?w=600", "subcategory": "planters"},
+    {"id": "prod-008", "name": "Tulsi Thara", "description": "Natural wood log planter. Traditional Tulsi planter crafted from natural wood.", "price": 3999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/ya0idb2s_Screenshot%202025-10-15%20223940.png", "subcategory": "planters"},
     {"id": "prod-009", "name": "Wooden Planter", "description": "Natural wood planter with multiple plant holders. Perfect for succulents and small plants.", "price": 2500.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/0g8f7lpe_Screenshot%202025-10-15%20223832.png", "subcategory": "planters"},
     
     # Beauty Products
@@ -116,6 +116,7 @@ PRODUCTS = [
     {"id": "prod-020", "name": "Kappi", "description": "Traditional blend with Jaggery, Dry Ginger & Pepper. Net 100g", "price": 60.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/mlc7xarg_Kappi.png"},
     {"id": "prod-021", "name": "Hibiscus Tea", "description": "Caffeine-free Herbal Infusion. Refreshing tangy tea. Net 100g", "price": 250.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/nsiacpvn_Hibiscus%20Tea.png"},
     {"id": "prod-022", "name": "Turmeric Powder", "description": "Pure organic turmeric powder from Kerala.", "price": 200.00, "category": "pantry", "image_url": "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=600"},
+    {"id": "prod-039", "name": "Myrrh", "description": "Whole Myrrh Resin. Traditional aromatic resin. Net 100g", "price": 350.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/0frogqsd_Screenshot%202026-01-25%20214526.png"},
     {"id": "prod-023", "name": "Honey", "description": "100% Natural pure wild honey. 500ml/16.9oz", "price": 599.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/kf97qa1r_Honey.png"},
     {"id": "prod-024", "name": "Cloves", "description": "Whole Cloves from Kerala spice gardens. Net 100g", "price": 260.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/unam37wl_Cloves.png"},
     {"id": "prod-025", "name": "Pepper", "description": "Whole Black Peppercorns - the king of spices from Malabar. Net 100g", "price": 200.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/bpyhcfuh_Pepper.png"},
