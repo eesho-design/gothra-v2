@@ -747,18 +747,49 @@ const HomePage = () => (
 const HomeAboutSection = () => (
   <section className="py-20 bg-[#FAF8F5]" data-testid="home-about-section">
     <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">ABOUT US</h2>
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div>
           <img 
             src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/di2od5vi_Screenshot%202026-04-14%20184653.png" 
             alt="GOTHRA Store" 
-            className="w-full h-auto object-contain"
+            className="w-full h-[500px] object-cover"
           />
         </div>
         <div>
-          <Link to="/shop">
+          <p className="text-[#4A5D54] text-xl leading-relaxed mb-8">
+            Gothra is an entrepreneurial arm aiming for peace and non-violence. Here, we gather proletarian women entrepreneurs from different walks of life to promote their indigenous products, thereby inducing an organic lifestyle.
+          </p>
+          <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-[#1A2421]">Locally Made</h3>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-[#1A2421]">Ethically Sourced</h3>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 bg-[#F3EBE1] rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-[#1E3F33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-[#1A2421]">Eco-Friendly</h3>
+            </div>
+          </div>
+          <Link to="/about">
             <Button className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-10 h-12">
-              Shop Now
+              Learn More
             </Button>
           </Link>
         </div>
