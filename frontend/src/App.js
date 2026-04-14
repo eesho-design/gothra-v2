@@ -2,14 +2,39 @@ import { useState, useEffect, createContext, useContext, useCallback } from "rea
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { ShoppingCart, Menu, X, Plus, Minus, Trash2, ArrowRight, MapPin, Phone, Mail, Instagram, Loader2 } from "lucide-react";
+import { ShoppingCart, Menu, X, Plus, Minus, Trash2, ArrowRight, MapPin, Phone, Mail, Instagram, Loader2, ZoomIn } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
+import { Dialog, DialogContent } from "./components/ui/dialog";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Image Zoom Modal Component
+const ImageZoomModal = ({ isOpen, onClose, imageUrl, productName }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl w-[90vw] h-[90vh] p-0 bg-white border-none">
+        <div className="relative w-full h-full flex items-center justify-center p-4">
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-colors"
+            data-testid="close-zoom-modal"
+          >
+            <X size={24} className="text-[#1A2421]" />
+          </button>
+          <img 
+            src={imageUrl} 
+            alt={productName} 
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 // Cart Context
 const CartContext = createContext();
@@ -745,6 +770,7 @@ const HomeAboutSection = () => (
 // Home Products Section - Organized by categories
 const HomeProductsSection = () => {
   const [products, setProducts] = useState([]);
+  const [zoomImage, setZoomImage] = useState(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -769,8 +795,14 @@ const HomeProductsSection = () => {
 
   const ProductCard = ({ product }) => (
     <div className="bg-white p-3 text-center" data-testid={`product-${product.id}`}>
-      <div className="aspect-square overflow-hidden mb-3">
-        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+      <div 
+        className="aspect-square overflow-hidden mb-3 cursor-pointer relative group"
+        onClick={() => setZoomImage({ url: product.image_url, name: product.name })}
+      >
+        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+          <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+        </div>
       </div>
       <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
       <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
@@ -782,6 +814,14 @@ const HomeProductsSection = () => {
 
   return (
     <div data-testid="home-products-section">
+      {/* Image Zoom Modal */}
+      <ImageZoomModal 
+        isOpen={!!zoomImage} 
+        onClose={() => setZoomImage(null)} 
+        imageUrl={zoomImage?.url} 
+        productName={zoomImage?.name}
+      />
+
       {/* Jute Curtains */}
       <section className="py-16 bg-[#F3EBE1]">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -789,8 +829,14 @@ const HomeProductsSection = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {juteCurtains.map((product) => (
               <div key={product.id} className="bg-white p-4">
-                <div className="aspect-[3/4] overflow-hidden mb-4">
-                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                <div 
+                  className="aspect-[3/4] overflow-hidden mb-4 cursor-pointer relative group"
+                  onClick={() => setZoomImage({ url: product.image_url, name: product.name })}
+                >
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
+                  </div>
                 </div>
                 <h3 className="heading-serif text-xl font-semibold text-[#1A2421]">{product.name}</h3>
                 <p className="text-[#4A5D54] text-sm mt-2 line-clamp-2">{product.description}</p>
