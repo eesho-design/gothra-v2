@@ -124,7 +124,6 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-10">
             <Link to="/" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-home">Home</Link>
             <Link to="/category/beauty" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-beauty">Beauty</Link>
-            <Link to="/category/pantry" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-pantry">Pantry</Link>
             <Link to="/category/home-decor" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-decor">Decor</Link>
             <Link to="/about" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-mission">Our Mission</Link>
           </div>
@@ -143,7 +142,6 @@ const Header = () => {
             <div className="flex flex-col gap-4">
               <Link to="/" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Home</Link>
               <Link to="/category/beauty" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Beauty</Link>
-              <Link to="/category/pantry" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Pantry</Link>
               <Link to="/category/home-decor" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Decor</Link>
               <Link to="/about" className="text-lg font-medium text-[#1A2421]" onClick={() => setMobileMenuOpen(false)}>Our Mission</Link>
             </div>
@@ -829,12 +827,16 @@ const AboutPage = () => (
       <h1 className="heading-serif text-5xl md:text-6xl text-white relative z-10">About Us</h1>
     </section>
 
-    {/* About Content */}
+    {/* About Content with Store Image */}
     <section className="py-20 bg-[#FAF8F5]">
-      <div className="max-w-4xl mx-auto px-6 md:px-12 text-center">
-        <p className="text-[#4A5D54] text-xl leading-relaxed">
-          Gothra is an entrepreneurial arm aiming for peace and non-violence. Here, we gather proletarian women entrepreneurs from different walks of life to promote their indigenous products, thereby inducing an organic lifestyle.
-        </p>
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="flex justify-center">
+          <img 
+            src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/di2od5vi_Screenshot%202026-04-14%20184653.png" 
+            alt="GOTHRA Store Interior" 
+            className="w-full max-w-4xl h-auto object-contain"
+          />
+        </div>
       </div>
     </section>
 
@@ -879,8 +881,6 @@ const AboutPage = () => (
       </div>
     </section>
 
-    {/* Mission Section */}
-    <AboutSection />
     <ComingSoonSection />
   </div>
 );
