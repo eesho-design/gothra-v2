@@ -148,8 +148,16 @@ async def seed_products():
 
 # Product Routes
 @api_router.get("/products", response_model=List[Product])
-async def get_products(category: Optional[str] = None):
-    query = {} if not category else {"category": category}
+async def get_products(category: Optional[str] = None, search: Optional[str] = None):
+    query = {}
+    if category:
+        query["category"] = category
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}},
+            {"category": {"$regex": search, "$options": "i"}},
+        ]
     products = await db.products.find(query, {"_id": 0}).to_list(100)
     return products
 
@@ -159,6 +167,21 @@ async def get_product(product_id: str):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+
+@api_router.post("/newsletter/subscribe")
+async def subscribe_newsletter(request: Request):
+    body = await request.json()
+    email = body.get("email", "").strip()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Valid email required")
+    existing = await db.newsletter.find_one({"email": email})
+    if existing:
+        return {"message": "Already subscribed", "subscribed": True}
+    await db.newsletter.insert_one({
+        "email": email,
+        "subscribed_at": datetime.now(timezone.utc).isoformat()
+    })
+    return {"message": "Successfully subscribed!", "subscribed": True}
 
 # Cart Routes
 @api_router.get("/cart/{session_id}")
