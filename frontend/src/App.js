@@ -239,18 +239,18 @@ const Header = () => {
               GOTHRA
             </Link>
             <div className="hidden md:flex items-center gap-10">
-              <Link to="/" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-home">Home</Link>
-              <Link to="/about" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-about">About Us</Link>
-              <Link to="/contact" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-contact">Contact Us</Link>
-              <Link to="/shop" className="nav-link text-sm font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-products">Products</Link>
+              <Link to="/" className="nav-link text-base font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-home">Home</Link>
+              <Link to="/about" className="nav-link text-base font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-about">About Us</Link>
+              <Link to="/contact" className="nav-link text-base font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-contact">Contact Us</Link>
+              <Link to="/shop" className="nav-link text-base font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-products">Products</Link>
             </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setSearchOpen(true)} className="p-2 hover:bg-[#F3EBE1] rounded-full transition-colors" data-testid="search-btn">
-                <Search size={20} className="text-[#1A2421]" />
+            <div className="flex items-center gap-4">
+              <button onClick={() => setSearchOpen(true)} className="p-3 hover:bg-[#F3EBE1] rounded-full transition-colors" data-testid="search-btn">
+                <Search size={26} className="text-[#1A2421]" />
               </button>
               <CartSheet itemCount={itemCount} />
-              <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} data-testid="mobile-menu-btn">
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              <button className="md:hidden p-3" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} data-testid="mobile-menu-btn">
+                {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
             </div>
           </nav>
@@ -278,10 +278,10 @@ const CartSheet = ({ itemCount }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <button className="relative p-2" data-testid="cart-btn">
-          <ShoppingCart size={20} className="text-[#1A2421]" />
+        <button className="relative p-3" data-testid="cart-btn">
+          <ShoppingCart size={26} className="text-[#1A2421]" />
           {itemCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#C05A42] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
+            <span className="absolute -top-0 -right-0 bg-[#C05A42] text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-medium">
               {itemCount}
             </span>
           )}
@@ -420,7 +420,7 @@ const HomeProductsSection = () => {
         <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
       </Link>
       <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
-      <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs w-full">Add</Button>
+      <Button onClick={() => addToCart(product.id)} size="sm" className="mt-3 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-sm w-full h-9">Add</Button>
     </div>
   );
 
@@ -445,7 +445,7 @@ const HomeProductsSection = () => {
                 <p className="text-[#4A5D54] text-sm mt-2 line-clamp-2">{product.description}</p>
                 <div className="mt-4 flex items-center justify-between">
                   <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()} approx</span>
-                  <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs">Add to Cart</Button>
+                  <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-sm px-5 h-9">Add to Cart</Button>
                 </div>
               </div>
             ))}
@@ -843,7 +843,7 @@ const ShopPage = () => {
                   <p className="text-[#4A5D54] text-sm mt-1 line-clamp-2">{product.description}</p>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()}</span>
-                    <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs">Add</Button>
+                    <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-sm px-5 h-9">Add</Button>
                   </div>
                 </div>
               </div>
