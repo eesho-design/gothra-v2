@@ -96,10 +96,15 @@ const CartProvider = ({ children }) => {
     }
   };
 
-  const checkout = async () => {
+  const checkout = async (customerEmail, customerName) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API}/checkout/create-session`, { session_id: sessionId, origin_url: window.location.origin });
+      const response = await axios.post(`${API}/checkout/create-session`, {
+        session_id: sessionId,
+        origin_url: window.location.origin,
+        customer_email: customerEmail || "",
+        customer_name: customerName || ""
+      });
       window.location.href = response.data.checkout_url;
     } catch (e) {
       toast.error("Failed to initiate checkout");
@@ -274,6 +279,16 @@ const Header = () => {
 // Cart Sheet Component
 const CartSheet = ({ itemCount }) => {
   const { cart, updateCartItem, checkout, isLoading } = useCart();
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerName, setCustomerName] = useState("");
+
+  const handleCheckout = () => {
+    if (!customerEmail.trim() || !customerEmail.includes("@")) {
+      toast.error("Please enter a valid email for order confirmation");
+      return;
+    }
+    checkout(customerEmail.trim(), customerName.trim());
+  };
 
   return (
     <Sheet>
@@ -327,12 +342,29 @@ const CartSheet = ({ itemCount }) => {
                   </div>
                 ))}
               </div>
-              <div className="border-t border-[#EAD8C3] pt-6 mt-4">
-                <div className="flex justify-between items-center mb-6">
+              <div className="border-t border-[#EAD8C3] pt-5 mt-4 space-y-3">
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full px-4 py-2.5 rounded-full bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33] transition-colors"
+                  data-testid="checkout-name-input"
+                />
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="Your email (for order confirmation)"
+                  required
+                  className="w-full px-4 py-2.5 rounded-full bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33] transition-colors"
+                  data-testid="checkout-email-input"
+                />
+                <div className="flex justify-between items-center pt-2 pb-2">
                   <span className="text-lg font-medium">Total</span>
                   <span className="text-xl font-semibold heading-serif">₹{cart.total.toLocaleString()}</span>
                 </div>
-                <Button onClick={checkout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-12 text-base" data-testid="checkout-btn">
+                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-12 text-base" data-testid="checkout-btn">
                   {isLoading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
                   Proceed to Checkout
                 </Button>

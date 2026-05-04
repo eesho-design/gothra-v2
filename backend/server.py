@@ -4,12 +4,14 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict
 import uuid
 from datetime import datetime, timezone
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+import resend
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -21,6 +23,11 @@ db = client[os.environ['DB_NAME']]
 
 # Stripe setup
 stripe_api_key = os.environ.get('STRIPE_API_KEY')
+
+# Resend email setup
+resend.api_key = os.environ.get('RESEND_API_KEY')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+STORE_EMAIL = os.environ.get('STORE_EMAIL', '7gothra@gmail.com')
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -72,6 +79,8 @@ class UpdateCartRequest(BaseModel):
 class CheckoutRequest(BaseModel):
     session_id: str
     origin_url: str
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
 
 class PaymentTransaction(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -273,6 +282,107 @@ async def clear_cart(session_id: str):
     await db.carts.delete_one({"session_id": session_id})
     return {"message": "Cart cleared"}
 
+# Email sending helpers
+async def send_owner_notification(order_id: str, items: List[Dict], total: float, customer_email: str, customer_name: str):
+    """Send order notification email to store owner"""
+    try:
+        items_rows = ""
+        for item in items:
+            items_rows += f"""<tr>
+                <td style="padding:10px 12px;border-bottom:1px solid #EAD8C3;font-family:sans-serif;font-size:14px;color:#1A2421;">{item['name']}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #EAD8C3;font-family:sans-serif;font-size:14px;color:#4A5D54;text-align:center;">{item['quantity']}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #EAD8C3;font-family:sans-serif;font-size:14px;color:#C05A42;text-align:right;">₹{item['price'] * item['quantity']:,.0f}</td>
+            </tr>"""
+
+        html = f"""
+        <div style="max-width:600px;margin:0 auto;font-family:sans-serif;">
+            <div style="background:#1E3F33;padding:24px;text-align:center;">
+                <h1 style="color:#FAF8F5;margin:0;font-size:24px;">New Order Received!</h1>
+            </div>
+            <div style="padding:24px;background:#FAF8F5;">
+                <p style="color:#1A2421;font-size:16px;margin-bottom:4px;"><strong>Order ID:</strong> {order_id}</p>
+                <p style="color:#4A5D54;font-size:14px;margin-bottom:4px;"><strong>Customer:</strong> {customer_name or 'Guest'}</p>
+                <p style="color:#4A5D54;font-size:14px;margin-bottom:16px;"><strong>Email:</strong> {customer_email or 'Not provided'}</p>
+                <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;">
+                    <thead><tr style="background:#F3EBE1;">
+                        <th style="padding:10px 12px;text-align:left;font-family:sans-serif;font-size:13px;color:#4A5D54;">Item</th>
+                        <th style="padding:10px 12px;text-align:center;font-family:sans-serif;font-size:13px;color:#4A5D54;">Qty</th>
+                        <th style="padding:10px 12px;text-align:right;font-family:sans-serif;font-size:13px;color:#4A5D54;">Amount</th>
+                    </tr></thead>
+                    <tbody>{items_rows}</tbody>
+                </table>
+                <div style="margin-top:16px;padding:16px;background:#1E3F33;border-radius:8px;text-align:right;">
+                    <span style="color:#FAF8F5;font-size:18px;font-weight:bold;">Total: ₹{total:,.0f}</span>
+                </div>
+                <p style="color:#4A5D54;font-size:12px;margin-top:16px;">Order placed on {datetime.now(timezone.utc).strftime('%d %b %Y, %I:%M %p')} UTC</p>
+            </div>
+        </div>"""
+
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [STORE_EMAIL],
+            "subject": f"GOTHRA - New Order #{order_id[:8]} (₹{total:,.0f})",
+            "html": html
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Owner notification sent for order {order_id}")
+    except Exception as e:
+        logger.error(f"Failed to send owner notification: {e}")
+
+
+async def send_customer_confirmation(customer_email: str, customer_name: str, order_id: str, items: List[Dict], total: float):
+    """Send order confirmation email to customer"""
+    if not customer_email:
+        return
+    try:
+        items_rows = ""
+        for item in items:
+            items_rows += f"""<tr>
+                <td style="padding:10px 12px;border-bottom:1px solid #EAD8C3;font-family:sans-serif;font-size:14px;color:#1A2421;">{item['name']}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #EAD8C3;font-family:sans-serif;font-size:14px;color:#4A5D54;text-align:center;">{item['quantity']}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #EAD8C3;font-family:sans-serif;font-size:14px;color:#C05A42;text-align:right;">₹{item['price'] * item['quantity']:,.0f}</td>
+            </tr>"""
+
+        html = f"""
+        <div style="max-width:600px;margin:0 auto;font-family:sans-serif;">
+            <div style="background:#1E3F33;padding:24px;text-align:center;">
+                <h1 style="color:#FAF8F5;margin:0;font-size:24px;">Thank you for your order!</h1>
+            </div>
+            <div style="padding:24px;background:#FAF8F5;">
+                <p style="color:#1A2421;font-size:16px;">Hi {customer_name or 'there'},</p>
+                <p style="color:#4A5D54;font-size:14px;">Your order has been confirmed. Here's a summary:</p>
+                <p style="color:#4A5D54;font-size:13px;margin-bottom:16px;"><strong>Order ID:</strong> {order_id}</p>
+                <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;">
+                    <thead><tr style="background:#F3EBE1;">
+                        <th style="padding:10px 12px;text-align:left;font-family:sans-serif;font-size:13px;color:#4A5D54;">Item</th>
+                        <th style="padding:10px 12px;text-align:center;font-family:sans-serif;font-size:13px;color:#4A5D54;">Qty</th>
+                        <th style="padding:10px 12px;text-align:right;font-family:sans-serif;font-size:13px;color:#4A5D54;">Amount</th>
+                    </tr></thead>
+                    <tbody>{items_rows}</tbody>
+                </table>
+                <div style="margin-top:16px;padding:16px;background:#1E3F33;border-radius:8px;text-align:right;">
+                    <span style="color:#FAF8F5;font-size:18px;font-weight:bold;">Total: ₹{total:,.0f}</span>
+                </div>
+                <div style="margin-top:24px;padding:16px;background:#fff;border-radius:8px;border:1px solid #EAD8C3;">
+                    <p style="color:#1A2421;font-size:14px;margin:0 0 8px 0;font-weight:bold;">Need help?</p>
+                    <p style="color:#4A5D54;font-size:13px;margin:0;">Email us at <a href="mailto:7gothra@gmail.com" style="color:#1E3F33;">7gothra@gmail.com</a> or call <a href="tel:+919446014710" style="color:#1E3F33;">+91 9446014710</a></p>
+                </div>
+                <p style="color:#4A5D54;font-size:12px;margin-top:20px;text-align:center;">GOTHRA — Inducing an organic lifestyle through indigenous craft</p>
+            </div>
+        </div>"""
+
+        params = {
+            "from": SENDER_EMAIL,
+            "to": [customer_email],
+            "subject": f"GOTHRA - Order Confirmed #{order_id[:8]}",
+            "html": html
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Customer confirmation sent to {customer_email} for order {order_id}")
+    except Exception as e:
+        logger.error(f"Failed to send customer confirmation: {e}")
+
+
 # Checkout Routes
 @api_router.post("/checkout/create-session")
 async def create_checkout_session(request: CheckoutRequest, http_request: Request):
@@ -334,6 +444,9 @@ async def create_checkout_session(request: CheckoutRequest, http_request: Reques
         "status": "pending",
         "payment_status": "pending",
         "items": items_detail,
+        "customer_email": request.customer_email or "",
+        "customer_name": request.customer_name or "",
+        "email_sent": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.payment_transactions.insert_one(transaction)
@@ -357,11 +470,25 @@ async def get_checkout_status(stripe_session_id: str, http_request: Request):
             {"$set": {"status": new_status, "payment_status": checkout_status.payment_status}}
         )
         
-        # If payment successful, clear the cart
+        # If payment successful, clear the cart and send emails
         if checkout_status.payment_status == "paid":
             transaction = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id}, {"_id": 0})
             if transaction:
                 await db.carts.delete_one({"session_id": transaction.get("cart_session_id")})
+                # Send emails only once
+                if not transaction.get("email_sent"):
+                    order_id = transaction.get("id", "N/A")
+                    items = transaction.get("items", [])
+                    total = transaction.get("amount", 0)
+                    customer_email = transaction.get("customer_email", "")
+                    customer_name = transaction.get("customer_name", "")
+                    # Fire emails in background (don't block response)
+                    asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
+                    asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
+                    await db.payment_transactions.update_one(
+                        {"stripe_session_id": stripe_session_id},
+                        {"$set": {"email_sent": True}}
+                    )
         
         return {
             "status": checkout_status.status,
@@ -401,7 +528,21 @@ async def stripe_webhook(request: Request):
                 {"$set": {"status": "completed", "payment_status": "paid"}}
             )
             
-            # Clear cart
+            # Send emails and clear cart
+            transaction = await db.payment_transactions.find_one({"stripe_session_id": webhook_response.session_id}, {"_id": 0})
+            if transaction and not transaction.get("email_sent"):
+                order_id = transaction.get("id", "N/A")
+                items = transaction.get("items", [])
+                total = transaction.get("amount", 0)
+                customer_email = transaction.get("customer_email", "")
+                customer_name = transaction.get("customer_name", "")
+                asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
+                asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
+                await db.payment_transactions.update_one(
+                    {"stripe_session_id": webhook_response.session_id},
+                    {"$set": {"email_sent": True}}
+                )
+
             if webhook_response.metadata:
                 cart_session_id = webhook_response.metadata.get("cart_session_id")
                 if cart_session_id:
