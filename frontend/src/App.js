@@ -249,13 +249,14 @@ const Header = () => {
               <Link to="/contact" className="nav-link text-base font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-contact">Contact Us</Link>
               <Link to="/shop" className="nav-link text-base font-medium tracking-wide text-[#4A5D54] hover:text-[#1A2421] transition-colors" data-testid="nav-products">Products</Link>
             </div>
-            <div className="flex items-center gap-4">
-              <button onClick={() => setSearchOpen(true)} className="p-3 hover:bg-[#F3EBE1] rounded-full transition-colors" data-testid="search-btn">
-                <Search size={26} className="text-[#1A2421]" />
+            <div className="flex items-center gap-2 md:gap-4">
+              <button onClick={() => setSearchOpen(true)} className="p-2 md:p-3 hover:bg-[#F3EBE1] rounded-full transition-colors" data-testid="search-btn">
+                <Search size={22} className="text-[#1A2421] md:hidden" />
+                <Search size={26} className="text-[#1A2421] hidden md:block" />
               </button>
               <CartSheet itemCount={itemCount} />
-              <button className="md:hidden p-3" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} data-testid="mobile-menu-btn">
-                {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+              <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} data-testid="mobile-menu-btn">
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
           </nav>
@@ -293,10 +294,11 @@ const CartSheet = ({ itemCount }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <button className="relative p-3" data-testid="cart-btn">
-          <ShoppingCart size={26} className="text-[#1A2421]" />
+        <button className="relative p-2 md:p-3" data-testid="cart-btn">
+          <ShoppingCart size={22} className="text-[#1A2421] md:hidden" />
+          <ShoppingCart size={26} className="text-[#1A2421] hidden md:block" />
           {itemCount > 0 && (
-            <span className="absolute -top-0 -right-0 bg-[#C05A42] text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-medium">
+            <span className="absolute -top-0 -right-0 bg-[#C05A42] text-white text-xs w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-medium">
               {itemCount}
             </span>
           )}
@@ -399,17 +401,17 @@ const ScrollToTop = () => {
 
 // Hero Section
 const HeroSection = () => (
-  <section className="pt-20 relative min-h-[85vh]" data-testid="hero-section">
+  <section className="pt-20 relative min-h-[60vh] md:min-h-[85vh]" data-testid="hero-section">
     <div className="absolute inset-0 z-0">
-      <img src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" alt="GOTHRA" className="w-full h-full object-cover" />
+      <img src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" alt="GOTHRA" className="w-full h-full object-cover object-center" />
     </div>
   </section>
 );
 
 // Home About Section
 const HomeAboutSection = () => (
-  <section className="py-16 bg-[#FAF8F5]" data-testid="home-about-section">
-    <div className="w-full px-4 md:px-8">
+  <section className="py-10 md:py-16 bg-[#FAF8F5]" data-testid="home-about-section">
+    <div className="w-full px-2 md:px-8">
       <div className="flex justify-center">
         <img 
           src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/di2od5vi_Screenshot%202026-04-14%20184653.png" 
@@ -441,18 +443,18 @@ const HomeProductsSection = () => {
   const punch = products.filter(p => p.category === 'kitchen' && (p.name.toLowerCase().includes('punch') || p.name.toLowerCase().includes('sarbath')));
 
   const SmallProductCard = ({ product }) => (
-    <div className="bg-white p-3 text-center group" data-testid={`product-${product.id}`}>
-      <div className="aspect-square overflow-hidden mb-3 cursor-pointer relative rounded-lg" onClick={() => setZoomImage({ url: product.image_url, name: product.name })}>
+    <div className="bg-white p-2 md:p-3 text-center group" data-testid={`product-${product.id}`}>
+      <div className="aspect-square overflow-hidden mb-2 md:mb-3 cursor-pointer relative rounded-lg" onClick={() => setZoomImage({ url: product.image_url, name: product.name })}>
         <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+          <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
         </div>
       </div>
       <Link to={`/product/${product.id}`} className="hover:underline">
-        <h3 className="text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
+        <h3 className="text-xs md:text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
       </Link>
-      <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{product.price}</p>
-      <Button onClick={() => addToCart(product.id)} size="sm" className="mt-3 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-sm w-full h-9">Add</Button>
+      <p className="text-[#C05A42] text-xs md:text-sm font-semibold mt-1">₹{product.price}</p>
+      <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs md:text-sm w-full h-7 md:h-9">Add</Button>
     </div>
   );
 
@@ -461,24 +463,22 @@ const HomeProductsSection = () => {
       <ImageZoomModal isOpen={!!zoomImage} onClose={() => setZoomImage(null)} imageUrl={zoomImage?.url} productName={zoomImage?.name} />
 
       {/* Jute Curtains */}
-      <section className="py-16 bg-[#F3EBE1]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">JUTE CURTAINS</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+      <section className="py-10 md:py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">JUTE CURTAINS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             {juteCurtains.map((product) => (
-              <div key={product.id} className="bg-white p-4 group">
-                <div className="aspect-[3/4] overflow-hidden mb-4 cursor-pointer relative" onClick={() => setZoomImage({ url: product.image_url, name: product.name })}>
+              <div key={product.id} className="bg-white p-3 md:p-4 group">
+                <div className="aspect-[3/4] overflow-hidden mb-3 md:mb-4 cursor-pointer relative rounded-lg" onClick={() => setZoomImage({ url: product.image_url, name: product.name })}>
                   <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={32} />
+                    <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={28} />
                   </div>
                 </div>
-                <Link to={`/product/${product.id}`} className="hover:underline"><h3 className="heading-serif text-xl font-semibold text-[#1A2421]">{product.name}</h3></Link>
-                <p className="text-[#4A5D54] text-sm mt-2 line-clamp-2">{product.description}</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()} approx</span>
-                  <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-sm px-5 h-9">Add to Cart</Button>
-                </div>
+                <Link to={`/product/${product.id}`} className="hover:underline"><h3 className="heading-serif text-base md:text-xl font-semibold text-[#1A2421]">{product.name}</h3></Link>
+                <p className="text-[#4A5D54] text-xs md:text-sm mt-1 md:mt-2 line-clamp-2 hidden md:block">{product.description}</p>
+                <p className="text-[#C05A42] font-semibold text-sm md:text-base mt-2">₹{product.price.toLocaleString()}</p>
+                <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs md:text-sm h-8 md:h-9">Add to Cart</Button>
               </div>
             ))}
           </div>
@@ -486,60 +486,60 @@ const HomeProductsSection = () => {
       </section>
 
       {/* Planters */}
-      <section className="py-16 bg-[#FAF8F5]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">PLANTERS</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+      <section className="py-10 md:py-16 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">PLANTERS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
             {planters.map((product) => <SmallProductCard key={product.id} product={product} />)}
           </div>
         </div>
       </section>
 
       {/* Beauty Products */}
-      <section className="py-16 bg-[#F3EBE1]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">BEAUTY PRODUCTS</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+      <section className="py-10 md:py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">BEAUTY PRODUCTS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4">
             {beautyProducts.map((product) => <SmallProductCard key={product.id} product={product} />)}
           </div>
         </div>
       </section>
 
       {/* Herbs */}
-      <section className="py-16 bg-[#FAF8F5]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">HERBS</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+      <section className="py-10 md:py-16 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">HERBS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4">
             {herbs.map((product) => <SmallProductCard key={product.id} product={product} />)}
           </div>
         </div>
       </section>
 
       {/* Spices */}
-      <section className="py-16 bg-[#F3EBE1]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">SPICES</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+      <section className="py-10 md:py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">SPICES</h2>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4">
             {spices.map((product) => <SmallProductCard key={product.id} product={product} />)}
           </div>
         </div>
       </section>
 
       {/* Pickles */}
-      <section className="py-16 bg-[#FAF8F5]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">PICKLES</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+      <section className="py-10 md:py-16 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">PICKLES</h2>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4">
             {pickles.map((product) => <SmallProductCard key={product.id} product={product} />)}
           </div>
         </div>
       </section>
 
       {/* Punch */}
-      <section className="py-16 bg-[#F3EBE1]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <h2 className="heading-serif text-4xl md:text-5xl text-[#1A2421] text-center mb-12">PUNCH</h2>
-          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+      <section className="py-10 md:py-16 bg-[#F3EBE1]">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <h2 className="heading-serif text-3xl md:text-5xl text-[#1A2421] text-center mb-8 md:mb-12">PUNCH</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-2xl mx-auto">
             {punch.map((product) => <SmallProductCard key={product.id} product={product} />)}
           </div>
         </div>
