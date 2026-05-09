@@ -12,6 +12,9 @@ import uuid
 from datetime import datetime, timezone
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 import resend
+import razorpay
+import hmac
+import hashlib
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -28,6 +31,11 @@ stripe_api_key = os.environ.get('STRIPE_API_KEY')
 resend.api_key = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 STORE_EMAIL = os.environ.get('STORE_EMAIL', '7gothra@gmail.com')
+
+# Razorpay setup
+razorpay_key_id = os.environ.get('RAZORPAY_KEY_ID')
+razorpay_key_secret = os.environ.get('RAZORPAY_KEY_SECRET')
+razorpay_client = razorpay.Client(auth=(razorpay_key_id, razorpay_key_secret))
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -81,6 +89,17 @@ class CheckoutRequest(BaseModel):
     origin_url: str
     customer_email: Optional[str] = None
     customer_name: Optional[str] = None
+
+class RazorpayCreateOrderRequest(BaseModel):
+    session_id: str
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+
+class RazorpayVerifyRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    session_id: str
 
 class PaymentTransaction(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -552,6 +571,127 @@ async def stripe_webhook(request: Request):
     except Exception as e:
         logger.error(f"Webhook error: {e}")
         return {"status": "error", "message": str(e)}
+
+# Razorpay Checkout Routes
+@api_router.post("/razorpay/create-order")
+async def razorpay_create_order(request: RazorpayCreateOrderRequest):
+    cart = await db.carts.find_one({"session_id": request.session_id})
+    if not cart or not cart.get("items"):
+        raise HTTPException(status_code=400, detail="Cart is empty")
+    
+    # Calculate total
+    total = 0.0
+    items_detail = []
+    product_ids = [item["product_id"] for item in cart["items"]]
+    products_cursor = db.products.find({"id": {"$in": product_ids}}, {"_id": 0})
+    products_list = await products_cursor.to_list(None)
+    products = {p["id"]: p for p in products_list}
+    
+    for item in cart["items"]:
+        product = products.get(item["product_id"])
+        if product:
+            item_total = product["price"] * item["quantity"]
+            total += item_total
+            items_detail.append({
+                "product_id": item["product_id"],
+                "name": product["name"],
+                "price": product["price"],
+                "quantity": item["quantity"]
+            })
+    
+    amount_paise = int(total * 100)
+    if amount_paise < 100:
+        raise HTTPException(status_code=400, detail="Minimum order amount is ₹1")
+    
+    try:
+        order_data = {
+            "amount": amount_paise,
+            "currency": "INR",
+            "receipt": f"order_{uuid.uuid4().hex[:12]}",
+        }
+        razorpay_order = await asyncio.to_thread(razorpay_client.order.create, data=order_data)
+        
+        # Store transaction
+        transaction = {
+            "id": str(uuid.uuid4()),
+            "razorpay_order_id": razorpay_order["id"],
+            "cart_session_id": request.session_id,
+            "amount": total,
+            "currency": "inr",
+            "status": "created",
+            "payment_status": "pending",
+            "payment_method": "razorpay",
+            "items": items_detail,
+            "customer_email": request.customer_email or "",
+            "customer_name": request.customer_name or "",
+            "email_sent": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.payment_transactions.insert_one(transaction)
+        
+        return {
+            "order_id": razorpay_order["id"],
+            "amount": amount_paise,
+            "currency": "INR",
+            "key_id": razorpay_key_id
+        }
+    except Exception as e:
+        logger.error(f"Razorpay create order error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create payment order")
+
+
+@api_router.post("/razorpay/verify-payment")
+async def razorpay_verify_payment(request: RazorpayVerifyRequest):
+    # Verify signature using HMAC-SHA256
+    message = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
+    generated_signature = hmac.new(
+        razorpay_key_secret.encode("utf-8"),
+        message.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+    
+    if generated_signature != request.razorpay_signature:
+        logger.warning(f"Razorpay signature mismatch for order {request.razorpay_order_id}")
+        raise HTTPException(status_code=400, detail="Payment verification failed")
+    
+    # Update transaction
+    transaction = await db.payment_transactions.find_one(
+        {"razorpay_order_id": request.razorpay_order_id}, {"_id": 0}
+    )
+    
+    await db.payment_transactions.update_one(
+        {"razorpay_order_id": request.razorpay_order_id},
+        {"$set": {
+            "status": "completed",
+            "payment_status": "paid",
+            "razorpay_payment_id": request.razorpay_payment_id,
+            "razorpay_signature": request.razorpay_signature
+        }}
+    )
+    
+    # Clear cart
+    await db.carts.delete_one({"session_id": request.session_id})
+    
+    # Send emails
+    if transaction and not transaction.get("email_sent"):
+        order_id = transaction.get("id", "N/A")
+        items = transaction.get("items", [])
+        total = transaction.get("amount", 0)
+        customer_email = transaction.get("customer_email", "")
+        customer_name = transaction.get("customer_name", "")
+        asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
+        asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
+        await db.payment_transactions.update_one(
+            {"razorpay_order_id": request.razorpay_order_id},
+            {"$set": {"email_sent": True}}
+        )
+    
+    return {
+        "status": "success",
+        "payment_id": request.razorpay_payment_id,
+        "order_id": request.razorpay_order_id
+    }
+
 
 # Root endpoint
 @api_router.get("/")

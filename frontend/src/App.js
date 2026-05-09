@@ -99,13 +99,56 @@ const CartProvider = ({ children }) => {
   const checkout = async (customerEmail, customerName) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API}/checkout/create-session`, {
+      // Create Razorpay order
+      const response = await axios.post(`${API}/razorpay/create-order`, {
         session_id: sessionId,
-        origin_url: window.location.origin,
         customer_email: customerEmail || "",
         customer_name: customerName || ""
       });
-      window.location.href = response.data.checkout_url;
+      const { order_id, amount, currency, key_id } = response.data;
+
+      const options = {
+        key: key_id,
+        amount: amount,
+        currency: currency,
+        name: "GOTHRA",
+        description: "Organic & Indigenous Products",
+        order_id: order_id,
+        prefill: {
+          name: customerName || "",
+          email: customerEmail || "",
+        },
+        theme: { color: "#1E3F33" },
+        handler: async function (response) {
+          try {
+            await axios.post(`${API}/razorpay/verify-payment`, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              session_id: sessionId
+            });
+            toast.success("Payment successful! Thank you for your order.");
+            await fetchCart();
+            window.location.href = `/checkout/success?razorpay=true&order_id=${response.razorpay_order_id}`;
+          } catch (err) {
+            toast.error("Payment verification failed. Please contact support.");
+          }
+          setIsLoading(false);
+        },
+        modal: {
+          ondismiss: function () {
+            setIsLoading(false);
+            toast("Payment cancelled", { description: "You can try again anytime." });
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        setIsLoading(false);
+        toast.error(`Payment failed: ${response.error.description}`);
+      });
+      rzp.open();
     } catch (e) {
       toast.error("Failed to initiate checkout");
       setIsLoading(false);
@@ -963,8 +1006,16 @@ const CheckoutSuccessPage = () => {
   const [paymentData, setPaymentData] = useState(null);
   const { fetchCart } = useCart();
   const sessionId = searchParams.get("session_id");
+  const isRazorpay = searchParams.get("razorpay") === "true";
+  const razorpayOrderId = searchParams.get("order_id");
 
   useEffect(() => {
+    // Razorpay payments are already verified before redirect
+    if (isRazorpay) {
+      setStatus("success");
+      fetchCart();
+      return;
+    }
     if (!sessionId) { setStatus("error"); return; }
     const checkStatus = async () => {
       try {
@@ -978,7 +1029,7 @@ const CheckoutSuccessPage = () => {
     checkStatus();
     const timeout = setTimeout(() => { if (status === "loading" || status === "pending") setStatus("timeout"); }, 30000);
     return () => clearTimeout(timeout);
-  }, [sessionId, fetchCart, status]);
+  }, [sessionId, fetchCart, status, isRazorpay]);
 
   return (
     <div className="pt-28 pb-24 min-h-screen" data-testid="checkout-success-page">

@@ -1,61 +1,42 @@
 # GOTHRA E-commerce Platform - PRD
 
 ## Original Problem Statement
-Create a full e-commerce website for GOTHRA - an entrepreneurial arm for proletarian women promoting indigenous, organic, and eco-friendly products. Features include Hero section (jute background, no text overlay), Product categories divided by type (Jute Curtains, Planters, Beauty, Herbs, Spices, Pickles, Punch), About section with store interior photo, Contact details, shopping cart with Stripe checkout, image zoom feature, product search, individual product pages, and order email notifications.
+Create a full e-commerce website for GOTHRA - an entrepreneurial arm for proletarian women promoting indigenous, organic, and eco-friendly products.
 
 ## What's Been Implemented
 - [x] Hero section with GOTHRA jute background (no text overlay)
-- [x] Product catalog with 39 products across 7 categories from PDF
-- [x] Category sections: Jute Curtains, Planters, Beauty, Herbs, Spices, Pickles, Punch
-- [x] Shopping cart with add/update/remove + name & email collection at checkout
-- [x] Stripe checkout integration
-- [x] About Us section with large, legible store interior image
-- [x] Contact section with Trivandrum address, phone, email, Instagram
-- [x] Image zoom modal on all product images
-- [x] Product Search overlay with live results & popular suggestions (Ctrl+K shortcut)
-- [x] Product Detail Pages with related products & breadcrumbs
+- [x] 39 products across 7 categories from PDF catalog
+- [x] Shopping cart with add/update/remove + customer name & email collection
+- [x] **Razorpay Standard Checkout** — order creation, payment modal, signature verification
+- [x] Stripe checkout integration (legacy, still functional)
+- [x] About Us section with store interior image
+- [x] Contact section with Trivandrum details
+- [x] Image zoom modal on all products
+- [x] Product Search with live results & Ctrl+K shortcut
+- [x] Product Detail Pages with related products
 - [x] Shop Page with category filter tabs
-- [x] Newsletter subscription (backend storage)
+- [x] Newsletter subscription
+- [x] Mobile-optimized responsive design (2-col grids, proper sizing)
+- [x] Order email notifications (Resend — needs domain verification)
 - [x] Scroll to top button
-- [x] Order email notifications (Resend integration - backend ready, needs domain verification)
-- [x] Customer order confirmation emails (backend ready, needs domain verification)
-- [x] All product images from user uploads / PDF extraction (no stock photos)
-- [x] Virgin Coconut Oil updated with GOTHRA branded bottle image
+- [x] All images from user uploads (no stock photos)
 
 ## Tech Stack
 - Frontend: React, Tailwind CSS, Shadcn/UI
 - Backend: FastAPI, MongoDB (motor)
-- Payments: Stripe via emergentintegrations
-- Email: Resend (needs gothra.org domain verification to go live)
-
-## P0 Features Remaining
-- Razorpay payment integration (when user provides API keys)
-- Complete Resend domain verification (gothra.org) for order emails
-
-## P1 Features Remaining
-- Order history/tracking
-- User authentication
-- Admin dashboard
-
-## P2 Features
-- Wishlist/Favorites
-- Product reviews & ratings
-- WhatsApp order notifications
-- Analytics
+- Payments: Razorpay (primary), Stripe (legacy)
+- Email: Resend (needs gothra.org domain verification)
 
 ## Key API Endpoints
 - GET /api/products (with ?search= and ?category=)
 - GET /api/products/{product_id}
 - POST /api/cart/add, POST /api/cart/update, DELETE /api/cart/{session_id}
-- GET /api/cart/{session_id}
-- POST /api/checkout/create-session (accepts customer_email, customer_name)
-- GET /api/checkout/status/{stripe_session_id}
+- POST /api/razorpay/create-order
+- POST /api/razorpay/verify-payment
+- POST /api/checkout/create-session (Stripe legacy)
 - POST /api/newsletter/subscribe
-- POST /api/webhook/stripe
 
-## Critical Notes
-- DO NOT use stock photos
-- Hero section: NO text overlay
-- Email notifications ready in code but need gothra.org verified at resend.com/domains
-- Resend API Key: stored in backend/.env
-- Store notification email: 7gothra@gmail.com
+## Remaining Tasks
+- P0: Verify gothra.org domain in Resend for order emails
+- P1: Admin dashboard, order history
+- P2: Wishlist, reviews, analytics
