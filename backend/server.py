@@ -693,6 +693,32 @@ async def razorpay_verify_payment(request: RazorpayVerifyRequest):
     }
 
 
+# Admin API Routes
+@api_router.get("/admin/orders")
+async def get_admin_orders():
+    orders = await db.payment_transactions.find(
+        {}, {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return orders
+
+@api_router.get("/admin/stats")
+async def get_admin_stats():
+    total_orders = await db.payment_transactions.count_documents({"payment_status": "paid"})
+    pipeline = [
+        {"$match": {"payment_status": "paid"}},
+        {"$group": {"_id": None, "total_revenue": {"$sum": "$amount"}}}
+    ]
+    revenue_result = await db.payment_transactions.aggregate(pipeline).to_list(1)
+    total_revenue = revenue_result[0]["total_revenue"] if revenue_result else 0
+    total_products = await db.products.count_documents({})
+    total_subscribers = await db.newsletter.count_documents({})
+    return {
+        "total_orders": total_orders,
+        "total_revenue": total_revenue,
+        "total_products": total_products,
+        "total_subscribers": total_subscribers
+    }
+
 # Root endpoint
 @api_router.get("/")
 async def root():

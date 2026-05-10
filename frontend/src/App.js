@@ -2,12 +2,13 @@ import { useState, useEffect, createContext, useContext, useCallback, useRef } f
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useNavigate, useSearchParams, useParams } from "react-router-dom";
 import axios from "axios";
-import { ShoppingCart, Menu, X, Plus, Minus, Trash2, ArrowRight, MapPin, Phone, Mail, Instagram, Loader2, ZoomIn, Search, ChevronUp, Heart, ArrowLeft, Share2, Star } from "lucide-react";
+import { ShoppingCart, Menu, X, Plus, Minus, Trash2, ArrowRight, MapPin, Phone, Mail, Instagram, Loader2, ZoomIn, Search, ChevronUp, Heart, ArrowLeft, Share2, Star, Package, DollarSign, Users, BarChart3, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "./components/ui/dialog";
+import { ClerkProvider, SignedIn, SignedOut, SignIn, UserButton, Protect } from "@clerk/clerk-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -1061,30 +1062,194 @@ const CheckoutSuccessPage = () => {
   );
 };
 
+// Admin Dashboard - Protected by Clerk
+const AdminDashboard = () => {
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [ordersRes, statsRes] = await Promise.all([
+          axios.get(`${API}/admin/orders`),
+          axios.get(`${API}/admin/stats`)
+        ]);
+        setOrders(ordersRes.data);
+        setStats(statsRes.data);
+      } catch (e) {
+        console.error("Failed to fetch admin data:", e);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return (
+    <div className="pt-28 min-h-screen flex items-center justify-center">
+      <Loader2 className="animate-spin text-[#1E3F33]" size={40} />
+    </div>
+  );
+
+  return (
+    <div className="pt-24 pb-20 min-h-screen bg-[#FAF8F5]" data-testid="admin-dashboard">
+      <div className="max-w-7xl mx-auto px-4 md:px-12">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="heading-serif text-3xl md:text-4xl text-[#1A2421]">Admin Dashboard</h1>
+            <p className="text-[#4A5D54] mt-1">Manage your GOTHRA store</p>
+          </div>
+          <UserButton afterSignOutUrl="/" />
+        </div>
+
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10" data-testid="admin-stats">
+            <div className="bg-white p-5 rounded-xl border border-[#EAD8C3]">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-[#1E3F33]/10 rounded-lg flex items-center justify-center">
+                  <Package size={20} className="text-[#1E3F33]" />
+                </div>
+                <span className="text-sm text-[#4A5D54]">Orders</span>
+              </div>
+              <p className="text-2xl font-semibold text-[#1A2421]" data-testid="stat-orders">{stats.total_orders}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border border-[#EAD8C3]">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-[#C05A42]/10 rounded-lg flex items-center justify-center">
+                  <DollarSign size={20} className="text-[#C05A42]" />
+                </div>
+                <span className="text-sm text-[#4A5D54]">Revenue</span>
+              </div>
+              <p className="text-2xl font-semibold text-[#1A2421]" data-testid="stat-revenue">₹{stats.total_revenue.toLocaleString()}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border border-[#EAD8C3]">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-[#1E3F33]/10 rounded-lg flex items-center justify-center">
+                  <BarChart3 size={20} className="text-[#1E3F33]" />
+                </div>
+                <span className="text-sm text-[#4A5D54]">Products</span>
+              </div>
+              <p className="text-2xl font-semibold text-[#1A2421]" data-testid="stat-products">{stats.total_products}</p>
+            </div>
+            <div className="bg-white p-5 rounded-xl border border-[#EAD8C3]">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-[#C05A42]/10 rounded-lg flex items-center justify-center">
+                  <Users size={20} className="text-[#C05A42]" />
+                </div>
+                <span className="text-sm text-[#4A5D54]">Subscribers</span>
+              </div>
+              <p className="text-2xl font-semibold text-[#1A2421]" data-testid="stat-subscribers">{stats.total_subscribers}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Orders Table */}
+        <div className="bg-white rounded-xl border border-[#EAD8C3] overflow-hidden" data-testid="admin-orders-table">
+          <div className="p-5 border-b border-[#EAD8C3]">
+            <h2 className="text-lg font-semibold text-[#1A2421]">Recent Orders</h2>
+          </div>
+          {orders.length === 0 ? (
+            <div className="p-10 text-center text-[#4A5D54]">
+              <Package size={40} className="mx-auto mb-3 opacity-30" />
+              <p>No orders yet</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#FAF8F5] text-left">
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Order ID</th>
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Customer</th>
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Items</th>
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Amount</th>
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Payment</th>
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Status</th>
+                    <th className="px-5 py-3 text-[#4A5D54] font-medium">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id || order.razorpay_order_id || order.stripe_session_id} className="border-t border-[#F3EBE1] hover:bg-[#FAF8F5]/50">
+                      <td className="px-5 py-4 text-[#1A2421] font-mono text-xs">{(order.id || "").substring(0, 8)}...</td>
+                      <td className="px-5 py-4">
+                        <div className="text-[#1A2421]">{order.customer_name || "Guest"}</div>
+                        <div className="text-xs text-[#4A5D54]">{order.customer_email || "—"}</div>
+                      </td>
+                      <td className="px-5 py-4 text-[#4A5D54]">
+                        {(order.items || []).map(i => i.name).join(", ").substring(0, 40) || "—"}
+                        {(order.items || []).map(i => i.name).join(", ").length > 40 ? "..." : ""}
+                      </td>
+                      <td className="px-5 py-4 text-[#1A2421] font-semibold">₹{(order.amount || 0).toLocaleString()}</td>
+                      <td className="px-5 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment_method === "razorpay" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"}`}>
+                          {order.payment_method === "razorpay" ? "Razorpay" : "Stripe"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.payment_status === "paid" ? "bg-green-50 text-green-700" : order.status === "created" ? "bg-yellow-50 text-yellow-700" : "bg-gray-50 text-gray-600"}`}>
+                          {order.payment_status === "paid" ? "Paid" : order.status || "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[#4A5D54] text-xs">{order.created_at ? new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Admin Page wrapper with Clerk auth
+const AdminPage = () => (
+  <>
+    <SignedIn>
+      <Protect fallback={<div className="pt-28 min-h-screen flex items-center justify-center text-[#4A5D54]">Access denied</div>}>
+        <AdminDashboard />
+      </Protect>
+    </SignedIn>
+    <SignedOut>
+      <div className="pt-28 min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5]" data-testid="admin-sign-in">
+        <h2 className="heading-serif text-3xl text-[#1A2421] mb-6">Admin Login</h2>
+        <SignIn routing="hash" />
+      </div>
+    </SignedOut>
+  </>
+);
+
 // Main App
+const CLERK_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
+
 function App() {
   return (
-    <div className="App bg-[#FAF8F5] min-h-screen">
-      <BrowserRouter>
-        <CartProvider>
-          <Header />
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/product/:productId" element={<ProductDetailPage />} />
-              <Route path="/category/:category" element={<ShopPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-            </Routes>
-          </main>
-          <Footer />
-          <ScrollToTop />
-          <Toaster position="bottom-right" />
-        </CartProvider>
-      </BrowserRouter>
-    </div>
+    <ClerkProvider publishableKey={CLERK_KEY}>
+      <div className="App bg-[#FAF8F5] min-h-screen">
+        <BrowserRouter>
+          <CartProvider>
+            <Header />
+            <main>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/product/:productId" element={<ProductDetailPage />} />
+                <Route path="/category/:category" element={<ShopPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+              </Routes>
+            </main>
+            <Footer />
+            <ScrollToTop />
+            <Toaster position="bottom-right" />
+          </CartProvider>
+        </BrowserRouter>
+      </div>
+    </ClerkProvider>
   );
 }
 

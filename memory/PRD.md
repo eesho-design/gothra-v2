@@ -6,37 +6,33 @@ Create a full e-commerce website for GOTHRA - an entrepreneurial arm for proleta
 ## What's Been Implemented
 - [x] Hero section with GOTHRA jute background (no text overlay)
 - [x] 39 products across 7 categories from PDF catalog
-- [x] Shopping cart with add/update/remove + customer name & email collection
-- [x] **Razorpay Standard Checkout** — order creation, payment modal, signature verification
-- [x] Stripe checkout integration (legacy, still functional)
-- [x] About Us section with store interior image
-- [x] Contact section with Trivandrum details
-- [x] Image zoom modal on all products
-- [x] Product Search with live results & Ctrl+K shortcut
-- [x] Product Detail Pages with related products
-- [x] Shop Page with category filter tabs
-- [x] Newsletter subscription
-- [x] Mobile-optimized responsive design (2-col grids, proper sizing)
+- [x] Shopping cart with customer name & email collection
+- [x] **Razorpay Standard Checkout** with signature verification
+- [x] Stripe checkout (legacy)
+- [x] **Clerk Auth on /admin** — SignedIn + Protect wrapping admin dashboard
+- [x] **Admin Dashboard** — Orders table, revenue/orders/products/subscribers stats
+- [x] About Us, Contact, Newsletter, Image Zoom
+- [x] Product Search, Product Detail Pages, Shop with category filters
+- [x] Mobile-optimized responsive design
 - [x] Order email notifications (Resend — needs domain verification)
-- [x] Scroll to top button
-- [x] All images from user uploads (no stock photos)
+- [x] Scroll to top, all images from user uploads
 
 ## Tech Stack
-- Frontend: React, Tailwind CSS, Shadcn/UI
-- Backend: FastAPI, MongoDB (motor)
+- Frontend: React, Tailwind CSS, Shadcn/UI, @clerk/clerk-react
+- Backend: FastAPI, MongoDB, razorpay SDK
 - Payments: Razorpay (primary), Stripe (legacy)
-- Email: Resend (needs gothra.org domain verification)
+- Auth: Clerk (admin dashboard)
+- Email: Resend (pending domain verification)
 
-## Key API Endpoints
-- GET /api/products (with ?search= and ?category=)
-- GET /api/products/{product_id}
-- POST /api/cart/add, POST /api/cart/update, DELETE /api/cart/{session_id}
-- POST /api/razorpay/create-order
-- POST /api/razorpay/verify-payment
-- POST /api/checkout/create-session (Stripe legacy)
-- POST /api/newsletter/subscribe
+## Key Routes
+- `/` — Homepage
+- `/shop` — All products with category filters
+- `/product/:id` — Product detail
+- `/about`, `/contact` — Info pages
+- `/admin` — Clerk-protected admin dashboard
+- `/checkout/success` — Payment confirmation
 
-## Remaining Tasks
-- P0: Verify gothra.org domain in Resend for order emails
-- P1: Admin dashboard, order history
+## Remaining
+- P0: Verify gothra.org in Resend for emails
+- P1: Order history for customers
 - P2: Wishlist, reviews, analytics
