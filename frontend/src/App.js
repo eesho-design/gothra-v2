@@ -697,6 +697,7 @@ const Footer = () => (
           <h4 className="font-medium mb-4">Quick Links</h4>
           <div className="space-y-2 text-[#F3EBE1]/80">
             <Link to="/shop" className="block hover:text-white transition-colors">Shop All</Link>
+            <Link to="/orders" className="block hover:text-white transition-colors">My Orders</Link>
             <Link to="/about" className="block hover:text-white transition-colors">Our Mission</Link>
             <Link to="/contact" className="block hover:text-white transition-colors">Contact</Link>
           </div>
@@ -1062,6 +1063,102 @@ const CheckoutSuccessPage = () => {
   );
 };
 
+// Order History Page - Customer looks up orders by email
+const OrderHistoryPage = () => {
+  const [email, setEmail] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+
+  const handleLookup = async (e) => {
+    e.preventDefault();
+    if (!email.trim() || !email.includes("@")) { toast.error("Please enter a valid email"); return; }
+    setLoading(true);
+    setSearched(true);
+    try {
+      const res = await axios.get(`${API}/orders/lookup?email=${encodeURIComponent(email.trim())}`);
+      setOrders(res.data);
+    } catch (err) {
+      toast.error("Failed to look up orders");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="pt-24 pb-20 min-h-screen bg-[#FAF8F5]" data-testid="order-history-page">
+      <div className="max-w-3xl mx-auto px-4 md:px-12">
+        <h1 className="heading-serif text-3xl md:text-4xl text-[#1A2421] mb-2">Order History</h1>
+        <p className="text-[#4A5D54] mb-8">Enter the email you used at checkout to view your orders.</p>
+
+        <form onSubmit={handleLookup} className="flex gap-3 mb-10" data-testid="order-lookup-form">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Your email address"
+            required
+            className="flex-1 px-5 py-3 rounded-full bg-white border border-[#EAD8C3] text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33] transition-colors"
+            data-testid="order-lookup-email"
+          />
+          <Button type="submit" disabled={loading} className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-8" data-testid="order-lookup-btn">
+            {loading ? <Loader2 className="animate-spin" size={18} /> : "Look Up"}
+          </Button>
+        </form>
+
+        {loading && (
+          <div className="flex justify-center py-12"><Loader2 className="animate-spin text-[#1E3F33]" size={32} /></div>
+        )}
+
+        {!loading && searched && orders.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-xl border border-[#EAD8C3]">
+            <Package size={40} className="mx-auto mb-3 text-[#4A5D54] opacity-30" />
+            <p className="text-[#4A5D54] text-lg">No orders found for this email</p>
+            <p className="text-[#4A5D54]/60 text-sm mt-1">Make sure you entered the same email used during checkout</p>
+          </div>
+        )}
+
+        {!loading && orders.length > 0 && (
+          <div className="space-y-4" data-testid="order-list">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-white rounded-xl border border-[#EAD8C3] overflow-hidden" data-testid={`order-${order.id}`}>
+                <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 bg-[#FAF8F5] border-b border-[#EAD8C3]">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-[#4A5D54] font-mono">#{(order.id || "").substring(0, 8)}</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">Paid</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${order.payment_method === "razorpay" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"}`}>
+                      {order.payment_method === "razorpay" ? "Razorpay" : "Stripe"}
+                    </span>
+                  </div>
+                  <span className="text-sm text-[#4A5D54]">
+                    {order.created_at ? new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : ""}
+                  </span>
+                </div>
+                <div className="px-5 py-4">
+                  <div className="space-y-3">
+                    {(order.items || []).map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between">
+                        <div>
+                          <span className="text-[#1A2421] font-medium">{item.name}</span>
+                          <span className="text-[#4A5D54] text-sm ml-2">x{item.quantity}</span>
+                        </div>
+                        <span className="text-[#C05A42] font-semibold">₹{(item.price * item.quantity).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#F3EBE1]">
+                    <span className="text-[#1A2421] font-medium">Total</span>
+                    <span className="heading-serif text-xl font-semibold text-[#1A2421]">₹{(order.amount || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Admin Dashboard - Protected by Clerk
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -1240,6 +1337,7 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+                <Route path="/orders" element={<OrderHistoryPage />} />
                 <Route path="/admin" element={<AdminPage />} />
               </Routes>
             </main>

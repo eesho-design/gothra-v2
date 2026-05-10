@@ -463,7 +463,7 @@ async def create_checkout_session(request: CheckoutRequest, http_request: Reques
         "status": "pending",
         "payment_status": "pending",
         "items": items_detail,
-        "customer_email": request.customer_email or "",
+        "customer_email": (request.customer_email or "").strip().lower(),
         "customer_name": request.customer_name or "",
         "email_sent": False,
         "created_at": datetime.now(timezone.utc).isoformat()
@@ -692,6 +692,17 @@ async def razorpay_verify_payment(request: RazorpayVerifyRequest):
         "order_id": request.razorpay_order_id
     }
 
+
+# Customer Order History
+@api_router.get("/orders/lookup")
+async def lookup_orders(email: str):
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Valid email required")
+    orders = await db.payment_transactions.find(
+        {"customer_email": email.strip().lower(), "payment_status": "paid"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    return orders
 
 # Admin API Routes
 @api_router.get("/admin/orders")
