@@ -360,11 +360,11 @@ const CartSheet = ({ itemCount }) => {
           )}
         </button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md bg-[#FAF8F5]">
-        <SheetHeader>
+      <SheetContent className="w-full sm:max-w-md bg-[#FAF8F5] flex flex-col p-4 pt-6 pb-6 max-h-[100dvh]">
+        <SheetHeader className="flex-shrink-0">
           <SheetTitle className="heading-serif text-2xl">Your Cart</SheetTitle>
         </SheetHeader>
-        <div className="mt-4 flex flex-col h-[calc(100vh-140px)]">
+        <div className="mt-2 flex flex-col flex-1 min-h-0 overflow-hidden">
           {cart.items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-[#4A5D54]">
               <ShoppingCart size={48} strokeWidth={1} />
@@ -377,17 +377,17 @@ const CartSheet = ({ itemCount }) => {
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-auto space-y-3 pr-1">
+              <div className="flex-1 overflow-auto space-y-2 pr-1 min-h-0">
                 {cart.items.map((item) => (
-                  <div key={item.product_id} className="flex gap-3 p-3 bg-white rounded-lg" data-testid={`cart-item-${item.product_id}`}>
-                    <img src={item.image_url} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                  <div key={item.product_id} className="flex gap-3 p-2.5 bg-white rounded-lg" data-testid={`cart-item-${item.product_id}`}>
+                    <img src={item.image_url} alt={item.name} className="w-14 h-14 object-cover rounded" />
                     <div className="flex-1">
-                      <h4 className="font-medium text-[#1A2421] text-sm">{item.name}</h4>
-                      <div className="flex items-center gap-1 mt-0.5">
+                      <h4 className="font-medium text-[#1A2421] text-sm leading-tight">{item.name}</h4>
+                      <div className="flex items-center gap-1">
                         <span className="text-sm text-[#4A5D54]">₹{item.price.toLocaleString()}</span>
-                        <span className="text-xs text-[#4A5D54]/60">+{item.gst_rate || 5}% GST</span>
+                        <span className="text-xs text-[#4A5D54]/60">+{item.gst_rate || 5}%</span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1.5">
+                      <div className="flex items-center gap-3 mt-1">
                         <button onClick={() => updateCartItem(item.product_id, item.quantity - 1)} className="p-1 hover:bg-[#F3EBE1] rounded" data-testid={`decrease-${item.product_id}`}><Minus size={14} /></button>
                         <span className="text-sm font-medium w-5 text-center">{item.quantity}</span>
                         <button onClick={() => updateCartItem(item.product_id, item.quantity + 1)} className="p-1 hover:bg-[#F3EBE1] rounded" data-testid={`increase-${item.product_id}`}><Plus size={14} /></button>
@@ -398,37 +398,32 @@ const CartSheet = ({ itemCount }) => {
                 ))}
 
                 {/* Customer Details */}
-                <div className="pt-3 space-y-2">
+                <div className="pt-2 space-y-1.5">
                   <p className="text-xs uppercase tracking-widest text-[#4A5D54]/60 font-medium">Contact & Delivery</p>
-                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Full name *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-name-input" />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Email *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-email-input" />
-                    <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-phone-input" />
+                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Full name *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-name-input" />
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Email *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-email-input" />
+                    <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-phone-input" />
                   </div>
-                  <input type="text" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} placeholder="Address (House/Street) *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-address-input" />
-                  <div className="grid grid-cols-3 gap-2">
-                    <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-city-input" />
-                    <input type="text" value={state} onChange={(e) => setState(e.target.value)} placeholder="State *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-state-input" />
-                    <input type="text" value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="PIN *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-pincode-input" />
+                  <input type="text" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} placeholder="Address (House/Street) *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-address-input" />
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-city-input" />
+                    <input type="text" value={state} onChange={(e) => setState(e.target.value)} placeholder="State *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-state-input" />
+                    <input type="text" value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="PIN *" className="w-full px-3 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-pincode-input" />
                   </div>
                 </div>
               </div>
 
-              {/* Price Summary */}
-              <div className="border-t border-[#EAD8C3] pt-4 mt-3 space-y-1">
-                <div className="flex justify-between text-sm text-[#4A5D54]">
-                  <span>Subtotal</span>
-                  <span>₹{(cart.subtotal || 0).toLocaleString()}</span>
+              {/* Price Summary - STICKY at bottom */}
+              <div className="flex-shrink-0 border-t border-[#EAD8C3] pt-2 pb-[env(safe-area-inset-bottom,8px)] bg-[#FAF8F5]">
+                <div className="flex items-center justify-between gap-4 mb-2">
+                  <div className="flex gap-3 text-xs text-[#4A5D54]">
+                    <span>Subtotal ₹{(cart.subtotal || 0).toLocaleString()}</span>
+                    <span>GST ₹{(cart.gst || 0).toLocaleString()}</span>
+                  </div>
+                  <span className="text-base font-semibold heading-serif text-[#1A2421]">₹{(cart.total || 0).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-sm text-[#4A5D54]">
-                  <span>GST</span>
-                  <span>₹{(cart.gst || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2 pb-2 border-t border-[#F3EBE1]">
-                  <span className="text-base font-medium">Total</span>
-                  <span className="text-lg font-semibold heading-serif">₹{(cart.total || 0).toLocaleString()}</span>
-                </div>
-                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-11 text-base" data-testid="checkout-btn">
+                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-12 text-base mb-6" data-testid="checkout-btn">
                   {isLoading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
                   Pay ₹{(cart.total || 0).toLocaleString()}
                 </Button>
@@ -1362,7 +1357,7 @@ function App() {
             </main>
             <Footer />
             <ScrollToTop />
-            <Toaster position="bottom-right" />
+            <Toaster position="top-center" />
           </CartProvider>
         </BrowserRouter>
       </div>
