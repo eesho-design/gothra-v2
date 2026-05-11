@@ -414,192 +414,18 @@ async def send_customer_confirmation(customer_email: str, customer_name: str, or
         logger.error(f"Failed to send customer confirmation: {e}")
 
 
-# Checkout Routes
-@api_router.post("/checkout/create-session")
-async def create_checkout_session(request: CheckoutRequest, http_request: Request):
-    cart = await db.carts.find_one({"session_id": request.session_id})
+# Shared helpers for payment processing
+async def calculate_cart_totals(session_id: str):
+    """Fetch cart, resolve products, calculate subtotal/GST/total and item details."""
+    cart = await db.carts.find_one({"session_id": session_id})
     if not cart or not cart.get("items"):
-        raise HTTPException(status_code=400, detail="Cart is empty")
-    
-    # Calculate total - batch query for performance
-    total = 0.0
-    items_detail = []
-    
-    # Collect all product IDs and fetch in single query
+        return None
     product_ids = [item["product_id"] for item in cart["items"]]
-    products_cursor = db.products.find({"id": {"$in": product_ids}}, {"_id": 0})
-    products_list = await products_cursor.to_list(None)
+    products_list = await db.products.find({"id": {"$in": product_ids}}, {"_id": 0}).to_list(None)
     products = {p["id"]: p for p in products_list}
-    
-    for item in cart["items"]:
-        product = products.get(item["product_id"])
-        if product:
-            item_total = product["price"] * item["quantity"]
-            total += item_total
-            items_detail.append({
-                "product_id": item["product_id"],
-                "name": product["name"],
-                "price": product["price"],
-                "quantity": item["quantity"]
-            })
-    
-    # Create Stripe checkout session
-    host_url = str(http_request.base_url).rstrip('/')
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
-    
-    success_url = f"{request.origin_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}"
-    cancel_url = f"{request.origin_url}/cart"
-    
-    checkout_request = CheckoutSessionRequest(
-        amount=total,
-        currency="inr",
-        success_url=success_url,
-        cancel_url=cancel_url,
-        metadata={
-            "cart_session_id": request.session_id,
-            "items_count": str(len(items_detail))
-        }
-    )
-    
-    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
-    
-    # Create payment transaction record
-    transaction = {
-        "id": str(uuid.uuid4()),
-        "stripe_session_id": session.session_id,
-        "cart_session_id": request.session_id,
-        "amount": total,
-        "currency": "inr",
-        "status": "pending",
-        "payment_status": "pending",
-        "items": items_detail,
-        "customer_email": (request.customer_email or "").strip().lower(),
-        "customer_name": request.customer_name or "",
-        "email_sent": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.payment_transactions.insert_one(transaction)
-    
-    return {"checkout_url": session.url, "session_id": session.session_id}
-
-@api_router.get("/checkout/status/{stripe_session_id}")
-async def get_checkout_status(stripe_session_id: str, http_request: Request):
-    host_url = str(http_request.base_url).rstrip('/')
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
-    
-    try:
-        checkout_status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(stripe_session_id)
-        
-        # Update transaction status
-        new_status = "completed" if checkout_status.payment_status == "paid" else checkout_status.status
-        await db.payment_transactions.update_one(
-            {"stripe_session_id": stripe_session_id},
-            {"$set": {"status": new_status, "payment_status": checkout_status.payment_status}}
-        )
-        
-        # If payment successful, clear the cart and send emails
-        if checkout_status.payment_status == "paid":
-            transaction = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id}, {"_id": 0})
-            if transaction:
-                await db.carts.delete_one({"session_id": transaction.get("cart_session_id")})
-                # Send emails only once
-                if not transaction.get("email_sent"):
-                    order_id = transaction.get("id", "N/A")
-                    items = transaction.get("items", [])
-                    total = transaction.get("amount", 0)
-                    customer_email = transaction.get("customer_email", "")
-                    customer_name = transaction.get("customer_name", "")
-                    # Fire emails in background (don't block response)
-                    asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
-                    asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
-                    await db.payment_transactions.update_one(
-                        {"stripe_session_id": stripe_session_id},
-                        {"$set": {"email_sent": True}}
-                    )
-        
-        return {
-            "status": checkout_status.status,
-            "payment_status": checkout_status.payment_status,
-            "amount_total": checkout_status.amount_total,
-            "currency": checkout_status.currency
-        }
-    except Exception as e:
-        logger.error(f"Error getting checkout status: {e}")
-        # Check if we have a local transaction record
-        transaction = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id}, {"_id": 0})
-        if transaction:
-            return {
-                "status": transaction.get("status", "pending"),
-                "payment_status": transaction.get("payment_status", "pending"),
-                "amount_total": int(transaction.get("amount", 0) * 100),
-                "currency": transaction.get("currency", "inr")
-            }
-        raise HTTPException(status_code=404, detail="Checkout session not found")
-
-@api_router.post("/webhook/stripe")
-async def stripe_webhook(request: Request):
-    body = await request.body()
-    signature = request.headers.get("Stripe-Signature")
-    
-    host_url = str(request.base_url).rstrip('/')
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    
-    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
-    
-    try:
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
-        
-        if webhook_response.payment_status == "paid":
-            await db.payment_transactions.update_one(
-                {"stripe_session_id": webhook_response.session_id},
-                {"$set": {"status": "completed", "payment_status": "paid"}}
-            )
-            
-            # Send emails and clear cart
-            transaction = await db.payment_transactions.find_one({"stripe_session_id": webhook_response.session_id}, {"_id": 0})
-            if transaction and not transaction.get("email_sent"):
-                order_id = transaction.get("id", "N/A")
-                items = transaction.get("items", [])
-                total = transaction.get("amount", 0)
-                customer_email = transaction.get("customer_email", "")
-                customer_name = transaction.get("customer_name", "")
-                asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
-                asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
-                await db.payment_transactions.update_one(
-                    {"stripe_session_id": webhook_response.session_id},
-                    {"$set": {"email_sent": True}}
-                )
-
-            if webhook_response.metadata:
-                cart_session_id = webhook_response.metadata.get("cart_session_id")
-                if cart_session_id:
-                    await db.carts.delete_one({"session_id": cart_session_id})
-        
-        return {"status": "ok"}
-    except Exception as e:
-        logger.error(f"Webhook error: {e}")
-        return {"status": "error", "message": str(e)}
-
-# Razorpay Checkout Routes
-@api_router.post("/razorpay/create-order")
-async def razorpay_create_order(request: RazorpayCreateOrderRequest):
-    cart = await db.carts.find_one({"session_id": request.session_id})
-    if not cart or not cart.get("items"):
-        raise HTTPException(status_code=400, detail="Cart is empty")
-    
-    # Calculate total with GST
     subtotal = 0.0
     total_gst = 0.0
     items_detail = []
-    product_ids = [item["product_id"] for item in cart["items"]]
-    products_cursor = db.products.find({"id": {"$in": product_ids}}, {"_id": 0})
-    products_list = await products_cursor.to_list(None)
-    products = {p["id"]: p for p in products_list}
-    
     for item in cart["items"]:
         product = products.get(item["product_id"])
         if product:
@@ -615,33 +441,136 @@ async def razorpay_create_order(request: RazorpayCreateOrderRequest):
                 "quantity": item["quantity"],
                 "gst_rate": gst_rate
             })
+    return {"subtotal": subtotal, "gst": total_gst, "total": round(subtotal + total_gst, 2), "items": items_detail}
+
+
+async def trigger_order_emails(transaction: dict, id_field: str, id_value: str):
+    """Send owner + customer emails for a completed order, mark as sent."""
+    if transaction.get("email_sent"):
+        return
+    order_id = transaction.get("id", "N/A")
+    items = transaction.get("items", [])
+    total = transaction.get("amount", 0)
+    customer_email = transaction.get("customer_email", "")
+    customer_name = transaction.get("customer_name", "")
+    asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
+    asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
+    await db.payment_transactions.update_one({id_field: id_value}, {"$set": {"email_sent": True}})
+
+
+# Checkout Routes
+@api_router.post("/checkout/create-session")
+async def create_checkout_session(request: CheckoutRequest, http_request: Request):
+    totals = await calculate_cart_totals(request.session_id)
+    if not totals:
+        raise HTTPException(status_code=400, detail="Cart is empty")
     
-    total = round(subtotal + total_gst, 2)
-    amount_paise = int(total * 100)
+    host_url = str(http_request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+    
+    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(CheckoutSessionRequest(
+        amount=totals["total"],
+        currency="inr",
+        success_url=f"{request.origin_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{request.origin_url}/cart",
+        metadata={"cart_session_id": request.session_id, "items_count": str(len(totals["items"]))}
+    ))
+    
+    await db.payment_transactions.insert_one({
+        "id": str(uuid.uuid4()),
+        "stripe_session_id": session.session_id,
+        "cart_session_id": request.session_id,
+        "amount": totals["total"],
+        "currency": "inr",
+        "status": "pending",
+        "payment_status": "pending",
+        "items": totals["items"],
+        "customer_email": (request.customer_email or "").strip().lower(),
+        "customer_name": request.customer_name or "",
+        "email_sent": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    return {"checkout_url": session.url, "session_id": session.session_id}
+
+@api_router.get("/checkout/status/{stripe_session_id}")
+async def get_checkout_status(stripe_session_id: str, http_request: Request):
+    host_url = str(http_request.base_url).rstrip('/')
+    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=f"{host_url}/api/webhook/stripe")
+    
+    try:
+        checkout_status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(stripe_session_id)
+        new_status = "completed" if checkout_status.payment_status == "paid" else checkout_status.status
+        await db.payment_transactions.update_one(
+            {"stripe_session_id": stripe_session_id},
+            {"$set": {"status": new_status, "payment_status": checkout_status.payment_status}}
+        )
+        if checkout_status.payment_status == "paid":
+            transaction = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id}, {"_id": 0})
+            if transaction:
+                await db.carts.delete_one({"session_id": transaction.get("cart_session_id")})
+                await trigger_order_emails(transaction, "stripe_session_id", stripe_session_id)
+        return {"status": checkout_status.status, "payment_status": checkout_status.payment_status, "amount_total": checkout_status.amount_total, "currency": checkout_status.currency}
+    except Exception as e:
+        logger.error(f"Error getting checkout status: {e}")
+        transaction = await db.payment_transactions.find_one({"stripe_session_id": stripe_session_id}, {"_id": 0})
+        if transaction:
+            return {"status": transaction.get("status", "pending"), "payment_status": transaction.get("payment_status", "pending"), "amount_total": int(transaction.get("amount", 0) * 100), "currency": transaction.get("currency", "inr")}
+        raise HTTPException(status_code=404, detail="Checkout session not found")
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    body = await request.body()
+    signature = request.headers.get("Stripe-Signature")
+    host_url = str(request.base_url).rstrip('/')
+    stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=f"{host_url}/api/webhook/stripe")
+    
+    try:
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        if webhook_response.payment_status == "paid":
+            await db.payment_transactions.update_one(
+                {"stripe_session_id": webhook_response.session_id},
+                {"$set": {"status": "completed", "payment_status": "paid"}}
+            )
+            transaction = await db.payment_transactions.find_one({"stripe_session_id": webhook_response.session_id}, {"_id": 0})
+            if transaction:
+                await trigger_order_emails(transaction, "stripe_session_id", webhook_response.session_id)
+            if webhook_response.metadata:
+                cart_session_id = webhook_response.metadata.get("cart_session_id")
+                if cart_session_id:
+                    await db.carts.delete_one({"session_id": cart_session_id})
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return {"status": "error", "message": str(e)}
+
+# Razorpay Checkout Routes
+@api_router.post("/razorpay/create-order")
+async def razorpay_create_order(request: RazorpayCreateOrderRequest):
+    totals = await calculate_cart_totals(request.session_id)
+    if not totals:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+    
+    amount_paise = int(totals["total"] * 100)
     if amount_paise < 100:
         raise HTTPException(status_code=400, detail="Minimum order amount is ₹1")
     
     try:
-        order_data = {
-            "amount": amount_paise,
-            "currency": "INR",
-            "receipt": f"order_{uuid.uuid4().hex[:12]}",
-        }
-        razorpay_order = await asyncio.to_thread(razorpay_client.order.create, data=order_data)
-        
-        # Store transaction with address
-        transaction = {
+        razorpay_order = await asyncio.to_thread(razorpay_client.order.create, data={
+            "amount": amount_paise, "currency": "INR", "receipt": f"order_{uuid.uuid4().hex[:12]}"
+        })
+        await db.payment_transactions.insert_one({
             "id": str(uuid.uuid4()),
             "razorpay_order_id": razorpay_order["id"],
             "cart_session_id": request.session_id,
-            "subtotal": subtotal,
-            "gst": total_gst,
-            "amount": total,
+            "subtotal": totals["subtotal"],
+            "gst": totals["gst"],
+            "amount": totals["total"],
             "currency": "inr",
             "status": "created",
             "payment_status": "pending",
             "payment_method": "razorpay",
-            "items": items_detail,
+            "items": totals["items"],
             "customer_email": (request.customer_email or "").strip().lower(),
             "customer_name": request.customer_name or "",
             "customer_phone": request.customer_phone or "",
@@ -653,15 +582,8 @@ async def razorpay_create_order(request: RazorpayCreateOrderRequest):
             },
             "email_sent": False,
             "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.payment_transactions.insert_one(transaction)
-        
-        return {
-            "order_id": razorpay_order["id"],
-            "amount": amount_paise,
-            "currency": "INR",
-            "key_id": razorpay_key_id
-        }
+        })
+        return {"order_id": razorpay_order["id"], "amount": amount_paise, "currency": "INR", "key_id": razorpay_key_id}
     except Exception as e:
         logger.error(f"Razorpay create order error: {e}")
         raise HTTPException(status_code=500, detail="Failed to create payment order")
@@ -682,10 +604,6 @@ async def razorpay_verify_payment(request: RazorpayVerifyRequest):
         raise HTTPException(status_code=400, detail="Payment verification failed")
     
     # Update transaction
-    transaction = await db.payment_transactions.find_one(
-        {"razorpay_order_id": request.razorpay_order_id}, {"_id": 0}
-    )
-    
     await db.payment_transactions.update_one(
         {"razorpay_order_id": request.razorpay_order_id},
         {"$set": {
@@ -700,24 +618,11 @@ async def razorpay_verify_payment(request: RazorpayVerifyRequest):
     await db.carts.delete_one({"session_id": request.session_id})
     
     # Send emails
-    if transaction and not transaction.get("email_sent"):
-        order_id = transaction.get("id", "N/A")
-        items = transaction.get("items", [])
-        total = transaction.get("amount", 0)
-        customer_email = transaction.get("customer_email", "")
-        customer_name = transaction.get("customer_name", "")
-        asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
-        asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
-        await db.payment_transactions.update_one(
-            {"razorpay_order_id": request.razorpay_order_id},
-            {"$set": {"email_sent": True}}
-        )
+    transaction = await db.payment_transactions.find_one({"razorpay_order_id": request.razorpay_order_id}, {"_id": 0})
+    if transaction:
+        await trigger_order_emails(transaction, "razorpay_order_id", request.razorpay_order_id)
     
-    return {
-        "status": "success",
-        "payment_id": request.razorpay_payment_id,
-        "order_id": request.razorpay_order_id
-    }
+    return {"status": "success", "payment_id": request.razorpay_payment_id, "order_id": request.razorpay_order_id}
 
 
 # Customer Order History

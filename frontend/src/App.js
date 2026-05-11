@@ -773,7 +773,7 @@ const ProductDetailPage = () => {
     };
     fetchProduct();
     window.scrollTo(0, 0);
-  }, [productId]);
+  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return (
     <div className="pt-28 min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#1E3F33]" size={40} /></div>
@@ -1037,19 +1037,20 @@ const CheckoutSuccessPage = () => {
       return;
     }
     if (!sessionId) { setStatus("error"); return; }
+    let timeoutId;
     const checkStatus = async () => {
       try {
         const response = await axios.get(`${API}/checkout/status/${sessionId}`);
         setPaymentData(response.data);
         if (response.data.payment_status === "paid") { setStatus("success"); await fetchCart(); }
         else if (response.data.status === "expired") { setStatus("expired"); }
-        else { setStatus("pending"); setTimeout(checkStatus, 3000); }
+        else { setStatus("pending"); timeoutId = setTimeout(checkStatus, 3000); }
       } catch (e) { setStatus("error"); }
     };
     checkStatus();
-    const timeout = setTimeout(() => { if (status === "loading" || status === "pending") setStatus("timeout"); }, 30000);
-    return () => clearTimeout(timeout);
-  }, [sessionId, fetchCart, status, isRazorpay]);
+    const globalTimeout = setTimeout(() => setStatus(prev => (prev === "loading" || prev === "pending") ? "timeout" : prev), 30000);
+    return () => { clearTimeout(timeoutId); clearTimeout(globalTimeout); };
+  }, [sessionId, fetchCart, isRazorpay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="pt-28 pb-24 min-h-screen" data-testid="checkout-success-page">
@@ -1153,8 +1154,8 @@ const OrderHistoryPage = () => {
                 </div>
                 <div className="px-5 py-4">
                   <div className="space-y-3">
-                    {(order.items || []).map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
+                    {(order.items || []).map((item) => (
+                      <div key={item.product_id || item.name} className="flex items-center justify-between">
                         <div>
                           <span className="text-[#1A2421] font-medium">{item.name}</span>
                           <span className="text-[#4A5D54] text-sm ml-2">x{item.quantity}</span>
