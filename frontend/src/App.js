@@ -458,9 +458,9 @@ const ScrollToTop = () => {
 
 // Hero Section
 const HeroSection = () => (
-  <section className="pt-20 relative min-h-[60vh] md:min-h-[85vh]" data-testid="hero-section">
-    <div className="absolute inset-0 z-0">
-      <img src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" alt="GOTHRA" className="w-full h-full object-cover object-center" />
+  <section className="pt-20 relative" data-testid="hero-section">
+    <div className="w-full">
+      <img src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" alt="GOTHRA" className="w-full h-auto object-contain" />
     </div>
   </section>
 );
