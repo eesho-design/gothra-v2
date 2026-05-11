@@ -61,6 +61,7 @@ class Product(BaseModel):
     image_url: str
     in_stock: bool = True
     subcategory: Optional[str] = None
+    gst_rate: float = 5.0
 
 class CartItem(BaseModel):
     product_id: str
@@ -94,6 +95,11 @@ class RazorpayCreateOrderRequest(BaseModel):
     session_id: str
     customer_email: Optional[str] = None
     customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
+    address_line: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
 
 class RazorpayVerifyRequest(BaseModel):
     razorpay_order_id: str
@@ -115,54 +121,54 @@ class PaymentTransaction(BaseModel):
 
 # Products data with correct names and prices from GOTHRA catalog PDF
 PRODUCTS = [
-    # Jute Curtains (Home Decor) - Using actual product images
-    {"id": "prod-001", "name": "Subtlety", "description": "100% raw jute, self-embroidered with clay bead highlights available in sheer as well as dimouts. 7ft-2pcs", "price": 4600.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/8910apx5_Subtlety.png", "subcategory": "jute-curtains"},
-    {"id": "prod-002", "name": "Traditions Alive", "description": "Jute curtain with elephant mascot application and brass anklet beads. A surprisingly delightful encounter on raw jute background. 7ft-2pcs", "price": 5999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/klf2iwua_Screenshot%202025-10-15%20221632.png", "subcategory": "jute-curtains"},
-    {"id": "prod-003", "name": "Shimmer", "description": "Zari borders reminds exotic saris of India. Can be customised in any unique border to match the colour scheme and decor of your space. 7ft-2pcs", "price": 2699.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/l2ea3lmw_Screenshot%202025-10-15%20222821.png", "subcategory": "jute-curtains"},
-    {"id": "prod-004", "name": "Black is Beautiful", "description": "Jute curtain with black satin ribbon. Customisation of change in colour of ribbon (blue, grey, brown) sheer and dim out versions. 7ft-2pcs", "price": 2225.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/8pzpco95_Screenshot%202025-10-15%20221555.png", "subcategory": "jute-curtains"},
-    {"id": "prod-005", "name": "Colonial Cousins", "description": "Jute curtain with white lace work. Engagement with global influences accommodating the best from both ends. 7ft-2pcs", "price": 3499.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/w7k5q5w6_Screenshot%202025-10-15%20223018.png", "subcategory": "jute-curtains"},
-    {"id": "prod-006", "name": "Earths Joy", "description": "Raw jute with terracotta beads and bamboo embellishments. Panels can be customised. 7ft-2pcs", "price": 4599.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/skfa2cza_Screenshot%202025-10-15%20223811.png", "subcategory": "jute-curtains"},
+    # Jute Curtains (Home Decor) - 18% GST
+    {"id": "prod-001", "name": "Subtlety", "description": "100% raw jute, self-embroidered with clay bead highlights available in sheer as well as dimouts. 7ft-2pcs", "price": 4600.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/8910apx5_Subtlety.png", "subcategory": "jute-curtains", "gst_rate": 18},
+    {"id": "prod-002", "name": "Traditions Alive", "description": "Jute curtain with elephant mascot application and brass anklet beads. A surprisingly delightful encounter on raw jute background. 7ft-2pcs", "price": 5999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/klf2iwua_Screenshot%202025-10-15%20221632.png", "subcategory": "jute-curtains", "gst_rate": 18},
+    {"id": "prod-003", "name": "Shimmer", "description": "Zari borders reminds exotic saris of India. Can be customised in any unique border to match the colour scheme and decor of your space. 7ft-2pcs", "price": 2699.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/l2ea3lmw_Screenshot%202025-10-15%20222821.png", "subcategory": "jute-curtains", "gst_rate": 18},
+    {"id": "prod-004", "name": "Black is Beautiful", "description": "Jute curtain with black satin ribbon. Customisation of change in colour of ribbon (blue, grey, brown) sheer and dim out versions. 7ft-2pcs", "price": 2225.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/8pzpco95_Screenshot%202025-10-15%20221555.png", "subcategory": "jute-curtains", "gst_rate": 18},
+    {"id": "prod-005", "name": "Colonial Cousins", "description": "Jute curtain with white lace work. Engagement with global influences accommodating the best from both ends. 7ft-2pcs", "price": 3499.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/w7k5q5w6_Screenshot%202025-10-15%20223018.png", "subcategory": "jute-curtains", "gst_rate": 18},
+    {"id": "prod-006", "name": "Earths Joy", "description": "Raw jute with terracotta beads and bamboo embellishments. Panels can be customised. 7ft-2pcs", "price": 4599.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/skfa2cza_Screenshot%202025-10-15%20223811.png", "subcategory": "jute-curtains", "gst_rate": 18},
     
-    # Planters
-    {"id": "prod-007", "name": "Terrarium", "description": "Handcrafted wooden terrarium planter with candle holder. Perfect for indoor plants.", "price": 1999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/q3llc4nq_Screenshot%202025-10-15%20220940.png", "subcategory": "planters"},
-    {"id": "prod-008", "name": "Tulsi Thara", "description": "Natural wood log planter. Traditional Tulsi planter crafted from natural wood.", "price": 3999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/ya0idb2s_Screenshot%202025-10-15%20223940.png", "subcategory": "planters"},
-    {"id": "prod-009", "name": "Wooden Planter", "description": "Natural wood planter with multiple plant holders. Perfect for succulents and small plants.", "price": 2500.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/0g8f7lpe_Screenshot%202025-10-15%20223832.png", "subcategory": "planters"},
+    # Planters - 18% GST
+    {"id": "prod-007", "name": "Terrarium", "description": "Handcrafted wooden terrarium planter with candle holder. Perfect for indoor plants.", "price": 1999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/q3llc4nq_Screenshot%202025-10-15%20220940.png", "subcategory": "planters", "gst_rate": 18},
+    {"id": "prod-008", "name": "Tulsi Thara", "description": "Natural wood log planter. Traditional Tulsi planter crafted from natural wood.", "price": 3999.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/ya0idb2s_Screenshot%202025-10-15%20223940.png", "subcategory": "planters", "gst_rate": 18},
+    {"id": "prod-009", "name": "Wooden Planter", "description": "Natural wood planter with multiple plant holders. Perfect for succulents and small plants.", "price": 2500.00, "category": "home-decor", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/0g8f7lpe_Screenshot%202025-10-15%20223832.png", "subcategory": "planters", "gst_rate": 18},
     
-    # Beauty Products
-    {"id": "prod-010", "name": "Beeswax Lip Balm", "description": "Paraben-free lip balm with beeswax, virgin coconut oil and vitamin E. Keeps lips soft and hydrated. 8g/.28 oz", "price": 140.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/fzgjafin_Beeswax%20Lip%20Balm.png"},
-    {"id": "prod-011", "name": "Virgin Coconut Oil", "description": "Cold-pressed virgin coconut oil extracted using authentic oriental methods. Multi-purpose for skin and hair.", "price": 359.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/20dptwav_Oval%20VCO.png"},
-    {"id": "prod-012", "name": "Herbal Face Pack", "description": "Natural face pack with Chandanam, Rakta Chandanam, Honey & Multani Mitti. 45g/1.59oz", "price": 300.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/7o4z86k0_HERBAL%20FACE%20MASK.png"},
-    {"id": "prod-013", "name": "Kasturi Manjal", "description": "Wild turmeric powder (Curcuma aromatica) for skin brightening and natural glow. Net 170g", "price": 210.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/sxfuodew_Kasturi%20Manjal.png"},
-    {"id": "prod-014", "name": "Multani Mitti", "description": "100% Natural Fuller's Earth clay for deep cleansing face masks. Net 170g", "price": 150.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/k9641yrt_Multani%20Mitti.png"},
-    {"id": "prod-015", "name": "Moringa Powder", "description": "100% Organic nutrient-rich moringa powder for health and beauty. Net 170g", "price": 350.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/x66g7cty_Moringa%20Powder.png"},
-    {"id": "prod-016", "name": "Henna Powder", "description": "Natural henna powder (Lawsonia inermis) for hair coloring and conditioning. Net 170g", "price": 100.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/v5icmldq_Henna%20Powder.png"},
-    {"id": "prod-017", "name": "Indigo Powder", "description": "100% Natural Hair Color indigo powder. Net 170g", "price": 150.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/dam9r3af_Indigo%20Powder.png"},
-    {"id": "prod-018", "name": "Amla Powder", "description": "Indian gooseberry powder (Emblica officinalis) for hair growth and health. Net 170g", "price": 210.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/a8cak0cy_Amla%20Powder.png"},
+    # Beauty Products - 18% GST (except VCO at 5%)
+    {"id": "prod-010", "name": "Beeswax Lip Balm", "description": "Paraben-free lip balm with beeswax, virgin coconut oil and vitamin E. Keeps lips soft and hydrated. 8g/.28 oz", "price": 140.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/fzgjafin_Beeswax%20Lip%20Balm.png", "gst_rate": 18},
+    {"id": "prod-011", "name": "Virgin Coconut Oil", "description": "Cold-pressed virgin coconut oil extracted using authentic oriental methods. Multi-purpose for skin and hair.", "price": 359.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/20dptwav_Oval%20VCO.png", "gst_rate": 5},
+    {"id": "prod-012", "name": "Herbal Face Pack", "description": "Natural face pack with Chandanam, Rakta Chandanam, Honey & Multani Mitti. 45g/1.59oz", "price": 300.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/7o4z86k0_HERBAL%20FACE%20MASK.png", "gst_rate": 18},
+    {"id": "prod-013", "name": "Kasturi Manjal", "description": "Wild turmeric powder (Curcuma aromatica) for skin brightening and natural glow. Net 170g", "price": 210.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/sxfuodew_Kasturi%20Manjal.png", "gst_rate": 18},
+    {"id": "prod-014", "name": "Multani Mitti", "description": "100% Natural Fuller's Earth clay for deep cleansing face masks. Net 170g", "price": 150.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/k9641yrt_Multani%20Mitti.png", "gst_rate": 18},
+    {"id": "prod-015", "name": "Moringa Powder", "description": "100% Organic nutrient-rich moringa powder for health and beauty. Net 170g", "price": 350.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/x66g7cty_Moringa%20Powder.png", "gst_rate": 5},
+    {"id": "prod-016", "name": "Henna Powder", "description": "Natural henna powder (Lawsonia inermis) for hair coloring and conditioning. Net 170g", "price": 100.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/v5icmldq_Henna%20Powder.png", "gst_rate": 18},
+    {"id": "prod-017", "name": "Indigo Powder", "description": "100% Natural Hair Color indigo powder. Net 170g", "price": 150.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/dam9r3af_Indigo%20Powder.png", "gst_rate": 18},
+    {"id": "prod-018", "name": "Amla Powder", "description": "Indian gooseberry powder (Emblica officinalis) for hair growth and health. Net 170g", "price": 210.00, "category": "beauty", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/a8cak0cy_Amla%20Powder.png", "gst_rate": 18},
     
-    # Herbs & Spices (Pantry)
-    {"id": "prod-019", "name": "Blue Tea", "description": "Blue Butterfly Pea Flower tea. Rich in antioxidants with a natural blue hue. Net 100g", "price": 250.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/cmts4kzm_Blue%20tea.png"},
-    {"id": "prod-020", "name": "Kappi", "description": "Traditional blend with Jaggery, Dry Ginger & Pepper. Net 100g", "price": 60.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/mlc7xarg_Kappi.png"},
-    {"id": "prod-021", "name": "Hibiscus Tea", "description": "Caffeine-free Herbal Infusion. Refreshing tangy tea. Net 100g", "price": 250.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/nsiacpvn_Hibiscus%20Tea.png"},
-    {"id": "prod-022", "name": "Turmeric Powder", "description": "Pure organic turmeric powder from Kerala. Net 100g", "price": 200.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/p0c7k8ts_Turmeric.png"},
-    {"id": "prod-039", "name": "Myrrh", "description": "Whole Myrrh Resin. Traditional aromatic resin. Net 100g", "price": 350.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/0frogqsd_Screenshot%202026-01-25%20214526.png"},
-    {"id": "prod-023", "name": "Honey", "description": "100% Natural pure wild honey. 500ml/16.9oz", "price": 599.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/kf97qa1r_Honey.png"},
-    {"id": "prod-024", "name": "Cloves", "description": "Whole Cloves from Kerala spice gardens. Net 100g", "price": 260.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/unam37wl_Cloves.png"},
-    {"id": "prod-025", "name": "Pepper", "description": "Whole Black Peppercorns - the king of spices from Malabar. Net 100g", "price": 200.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/bpyhcfuh_Pepper.png"},
-    {"id": "prod-026", "name": "Cardamom", "description": "Whole Cardamom Pods from Kerala hills. Premium quality, intense flavor. Net 100g", "price": 510.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/xlwmfnjt_Cardamom.png"},
-    {"id": "prod-027", "name": "Nutmeg", "description": "Whole Nutmeg with Fibers for authentic Kerala cuisine. Net 100g", "price": 125.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/coz6kvpd_Whole%20Nutmeg.png"},
-    {"id": "prod-028", "name": "Malabar Tamarind", "description": "Garcinie Cambogia - Premium quality Malabar tamarind, handpicked and sun-dried. Net 100g", "price": 150.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/uu8buodq_Malabar%20Tamarind.png"},
-    {"id": "prod-029", "name": "Cinnamon", "description": "Whole Cinnamon Bark with sweet aroma. Net 100g", "price": 150.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/xl87rko0_Cinnamon.png"},
+    # Herbs & Spices (Pantry) - 5% GST
+    {"id": "prod-019", "name": "Blue Tea", "description": "Blue Butterfly Pea Flower tea. Rich in antioxidants with a natural blue hue. Net 100g", "price": 250.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/cmts4kzm_Blue%20tea.png", "gst_rate": 5},
+    {"id": "prod-020", "name": "Kappi", "description": "Traditional blend with Jaggery, Dry Ginger & Pepper. Net 100g", "price": 60.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/mlc7xarg_Kappi.png", "gst_rate": 5},
+    {"id": "prod-021", "name": "Hibiscus Tea", "description": "Caffeine-free Herbal Infusion. Refreshing tangy tea. Net 100g", "price": 250.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/nsiacpvn_Hibiscus%20Tea.png", "gst_rate": 5},
+    {"id": "prod-022", "name": "Turmeric Powder", "description": "Pure organic turmeric powder from Kerala. Net 100g", "price": 200.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/p0c7k8ts_Turmeric.png", "gst_rate": 5},
+    {"id": "prod-039", "name": "Myrrh", "description": "Whole Myrrh Resin. Traditional aromatic resin. Net 100g", "price": 350.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/0frogqsd_Screenshot%202026-01-25%20214526.png", "gst_rate": 5},
+    {"id": "prod-023", "name": "Honey", "description": "100% Natural pure wild honey. 500ml/16.9oz", "price": 599.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/kf97qa1r_Honey.png", "gst_rate": 5},
+    {"id": "prod-024", "name": "Cloves", "description": "Whole Cloves from Kerala spice gardens. Net 100g", "price": 260.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/unam37wl_Cloves.png", "gst_rate": 5},
+    {"id": "prod-025", "name": "Pepper", "description": "Whole Black Peppercorns - the king of spices from Malabar. Net 100g", "price": 200.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/bpyhcfuh_Pepper.png", "gst_rate": 5},
+    {"id": "prod-026", "name": "Cardamom", "description": "Whole Cardamom Pods from Kerala hills. Premium quality, intense flavor. Net 100g", "price": 510.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/xlwmfnjt_Cardamom.png", "gst_rate": 5},
+    {"id": "prod-027", "name": "Nutmeg", "description": "Whole Nutmeg with Fibers for authentic Kerala cuisine. Net 100g", "price": 125.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/coz6kvpd_Whole%20Nutmeg.png", "gst_rate": 5},
+    {"id": "prod-028", "name": "Malabar Tamarind", "description": "Garcinie Cambogia - Premium quality Malabar tamarind, handpicked and sun-dried. Net 100g", "price": 150.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/uu8buodq_Malabar%20Tamarind.png", "gst_rate": 5},
+    {"id": "prod-029", "name": "Cinnamon", "description": "Whole Cinnamon Bark with sweet aroma. Net 100g", "price": 150.00, "category": "pantry", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/xl87rko0_Cinnamon.png", "gst_rate": 5},
     
-    # Kitchen Essentials (Pickles & Punch)
-    {"id": "prod-030", "name": "Curry Leaf Pickle", "description": "100% Natural curry leaf pickle. A unique Kerala delicacy. 200gm/7.05oz", "price": 220.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/3z98em8m_Curry%20Leaf-200gm%20%281%29.png"},
-    {"id": "prod-031", "name": "Nutmeg Pickle", "description": "100% Natural nutmeg pickle with authentic Kerala spices. 200gm/7.05oz", "price": 249.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/r7d78p40_Nutmeg-200gm.png"},
-    {"id": "prod-032", "name": "Carrot Pickle", "description": "100% Natural carrot pickle with Kerala spices. 200gm/7.05oz", "price": 229.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/if7itlsh_Carrot-200gm%20%281%29.png"},
-    {"id": "prod-033", "name": "Star Fruit Pickle", "description": "100% Natural tangy star fruit pickle. Perfect accompaniment for rice dishes. 200gm/7.05oz", "price": 220.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/412u5j3u_starfruit.jpeg"},
-    {"id": "prod-034", "name": "Raisins Pickle", "description": "100% Natural unique sweet and tangy raisins pickle. 200gm/7.05oz", "price": 310.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/v1bd64y8_Raisins%20pickle.jpeg"},
-    {"id": "prod-035", "name": "Lime and Dates Pickle", "description": "100% Natural sweet and sour lime with dates pickle. 200gm/7.05oz", "price": 229.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/wsbueoco_lime%20and%20dates.jpeg"},
-    {"id": "prod-036", "name": "Water Apple Punch", "description": "Refreshing water apple concentrate. 500ml/16.9oz", "price": 599.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/bnp8i9vk_Water%20apple%20punch.png"},
-    {"id": "prod-037", "name": "Pomegranate Punch", "description": "Refreshing pomegranate concentrate made from fresh fruits. 500ml/16.9oz", "price": 510.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/8n7s9mhp_pom%20punch.png"},
-    {"id": "prod-038", "name": "Naruneendi Sarbath", "description": "Traditional Kerala herbal drink concentrate. 500ml/16.9oz", "price": 130.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/4zhtlqeb_Naruneendi.png"},
+    # Kitchen Essentials (Pickles & Punch) - 5% GST
+    {"id": "prod-030", "name": "Curry Leaf Pickle", "description": "100% Natural curry leaf pickle. A unique Kerala delicacy. 200gm/7.05oz", "price": 220.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/3z98em8m_Curry%20Leaf-200gm%20%281%29.png", "gst_rate": 5},
+    {"id": "prod-031", "name": "Nutmeg Pickle", "description": "100% Natural nutmeg pickle with authentic Kerala spices. 200gm/7.05oz", "price": 249.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/r7d78p40_Nutmeg-200gm.png", "gst_rate": 5},
+    {"id": "prod-032", "name": "Carrot Pickle", "description": "100% Natural carrot pickle with Kerala spices. 200gm/7.05oz", "price": 229.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/if7itlsh_Carrot-200gm%20%281%29.png", "gst_rate": 5},
+    {"id": "prod-033", "name": "Star Fruit Pickle", "description": "100% Natural tangy star fruit pickle. Perfect accompaniment for rice dishes. 200gm/7.05oz", "price": 220.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/412u5j3u_starfruit.jpeg", "gst_rate": 5},
+    {"id": "prod-034", "name": "Raisins Pickle", "description": "100% Natural unique sweet and tangy raisins pickle. 200gm/7.05oz", "price": 310.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/v1bd64y8_Raisins%20pickle.jpeg", "gst_rate": 5},
+    {"id": "prod-035", "name": "Lime and Dates Pickle", "description": "100% Natural sweet and sour lime with dates pickle. 200gm/7.05oz", "price": 229.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/wsbueoco_lime%20and%20dates.jpeg", "gst_rate": 5},
+    {"id": "prod-036", "name": "Water Apple Punch", "description": "Refreshing water apple concentrate. 500ml/16.9oz", "price": 599.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/bnp8i9vk_Water%20apple%20punch.png", "gst_rate": 5},
+    {"id": "prod-037", "name": "Pomegranate Punch", "description": "Refreshing pomegranate concentrate made from fresh fruits. 500ml/16.9oz", "price": 510.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/8n7s9mhp_pom%20punch.png", "gst_rate": 5},
+    {"id": "prod-038", "name": "Naruneendi Sarbath", "description": "Traditional Kerala herbal drink concentrate. 500ml/16.9oz", "price": 130.00, "category": "kitchen", "image_url": "https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/4zhtlqeb_Naruneendi.png", "gst_rate": 5},
 ]
 
 # Seed products on startup
@@ -221,6 +227,7 @@ async def get_cart(session_id: str):
     # Calculate total and get product details - batch query for performance
     cart_items = []
     total = 0
+    total_gst = 0
     
     # Collect all product IDs and fetch in single query
     product_ids = [item["product_id"] for item in cart.get("items", [])]
@@ -232,18 +239,23 @@ async def get_cart(session_id: str):
         for item in cart.get("items", []):
             product = products.get(item["product_id"])
             if product:
+                gst_rate = product.get("gst_rate", 5)
                 item_total = product["price"] * item["quantity"]
+                gst_amount = round(item_total * gst_rate / 100, 2)
                 total += item_total
+                total_gst += gst_amount
                 cart_items.append({
                     "product_id": item["product_id"],
                     "name": product["name"],
                     "price": product["price"],
                     "quantity": item["quantity"],
                     "image_url": product["image_url"],
+                    "gst_rate": gst_rate,
+                    "gst_amount": gst_amount,
                     "item_total": item_total
                 })
     
-    return {"session_id": session_id, "items": cart_items, "total": total}
+    return {"session_id": session_id, "items": cart_items, "subtotal": total, "gst": total_gst, "total": round(total + total_gst, 2)}
 
 @api_router.post("/cart/add")
 async def add_to_cart(request: AddToCartRequest):
@@ -579,8 +591,9 @@ async def razorpay_create_order(request: RazorpayCreateOrderRequest):
     if not cart or not cart.get("items"):
         raise HTTPException(status_code=400, detail="Cart is empty")
     
-    # Calculate total
-    total = 0.0
+    # Calculate total with GST
+    subtotal = 0.0
+    total_gst = 0.0
     items_detail = []
     product_ids = [item["product_id"] for item in cart["items"]]
     products_cursor = db.products.find({"id": {"$in": product_ids}}, {"_id": 0})
@@ -590,15 +603,20 @@ async def razorpay_create_order(request: RazorpayCreateOrderRequest):
     for item in cart["items"]:
         product = products.get(item["product_id"])
         if product:
+            gst_rate = product.get("gst_rate", 5)
             item_total = product["price"] * item["quantity"]
-            total += item_total
+            gst_amount = round(item_total * gst_rate / 100, 2)
+            subtotal += item_total
+            total_gst += gst_amount
             items_detail.append({
                 "product_id": item["product_id"],
                 "name": product["name"],
                 "price": product["price"],
-                "quantity": item["quantity"]
+                "quantity": item["quantity"],
+                "gst_rate": gst_rate
             })
     
+    total = round(subtotal + total_gst, 2)
     amount_paise = int(total * 100)
     if amount_paise < 100:
         raise HTTPException(status_code=400, detail="Minimum order amount is ₹1")
@@ -611,19 +629,28 @@ async def razorpay_create_order(request: RazorpayCreateOrderRequest):
         }
         razorpay_order = await asyncio.to_thread(razorpay_client.order.create, data=order_data)
         
-        # Store transaction
+        # Store transaction with address
         transaction = {
             "id": str(uuid.uuid4()),
             "razorpay_order_id": razorpay_order["id"],
             "cart_session_id": request.session_id,
+            "subtotal": subtotal,
+            "gst": total_gst,
             "amount": total,
             "currency": "inr",
             "status": "created",
             "payment_status": "pending",
             "payment_method": "razorpay",
             "items": items_detail,
-            "customer_email": request.customer_email or "",
+            "customer_email": (request.customer_email or "").strip().lower(),
             "customer_name": request.customer_name or "",
+            "customer_phone": request.customer_phone or "",
+            "shipping_address": {
+                "line": request.address_line or "",
+                "city": request.city or "",
+                "state": request.state or "",
+                "pincode": request.pincode or ""
+            },
             "email_sent": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }

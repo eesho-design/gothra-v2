@@ -97,14 +97,18 @@ const CartProvider = ({ children }) => {
     }
   };
 
-  const checkout = async (customerEmail, customerName) => {
+  const checkout = async (customerEmail, customerName, customerPhone, addressLine, city, state, pincode) => {
     setIsLoading(true);
     try {
-      // Create Razorpay order
       const response = await axios.post(`${API}/razorpay/create-order`, {
         session_id: sessionId,
         customer_email: customerEmail || "",
-        customer_name: customerName || ""
+        customer_name: customerName || "",
+        customer_phone: customerPhone || "",
+        address_line: addressLine || "",
+        city: city || "",
+        state: state || "",
+        pincode: pincode || ""
       });
       const { order_id, amount, currency, key_id } = response.data;
 
@@ -326,13 +330,21 @@ const CartSheet = ({ itemCount }) => {
   const { cart, updateCartItem, checkout, isLoading } = useCart();
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [addressLine, setAddressLine] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
 
   const handleCheckout = () => {
-    if (!customerEmail.trim() || !customerEmail.includes("@")) {
-      toast.error("Please enter a valid email for order confirmation");
-      return;
-    }
-    checkout(customerEmail.trim(), customerName.trim());
+    if (!customerName.trim()) { toast.error("Please enter your name"); return; }
+    if (!customerEmail.trim() || !customerEmail.includes("@")) { toast.error("Please enter a valid email"); return; }
+    if (!customerPhone.trim() || customerPhone.trim().length < 10) { toast.error("Please enter a valid phone number"); return; }
+    if (!addressLine.trim()) { toast.error("Please enter your address"); return; }
+    if (!city.trim()) { toast.error("Please enter your city"); return; }
+    if (!state.trim()) { toast.error("Please enter your state"); return; }
+    if (!pincode.trim() || pincode.trim().length < 5) { toast.error("Please enter a valid PIN code"); return; }
+    checkout(customerEmail.trim(), customerName.trim(), customerPhone.trim(), addressLine.trim(), city.trim(), state.trim(), pincode.trim());
   };
 
   return (
@@ -352,7 +364,7 @@ const CartSheet = ({ itemCount }) => {
         <SheetHeader>
           <SheetTitle className="heading-serif text-2xl">Your Cart</SheetTitle>
         </SheetHeader>
-        <div className="mt-8 flex flex-col h-[calc(100vh-200px)]">
+        <div className="mt-4 flex flex-col h-[calc(100vh-140px)]">
           {cart.items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-[#4A5D54]">
               <ShoppingCart size={48} strokeWidth={1} />
@@ -365,54 +377,60 @@ const CartSheet = ({ itemCount }) => {
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-auto space-y-4">
+              <div className="flex-1 overflow-auto space-y-3 pr-1">
                 {cart.items.map((item) => (
-                  <div key={item.product_id} className="flex gap-4 p-4 bg-white rounded-lg" data-testid={`cart-item-${item.product_id}`}>
-                    <img src={item.image_url} alt={item.name} className="w-20 h-20 object-cover rounded" />
+                  <div key={item.product_id} className="flex gap-3 p-3 bg-white rounded-lg" data-testid={`cart-item-${item.product_id}`}>
+                    <img src={item.image_url} alt={item.name} className="w-16 h-16 object-cover rounded" />
                     <div className="flex-1">
-                      <h4 className="font-medium text-[#1A2421]">{item.name}</h4>
-                      <p className="text-sm text-[#4A5D54] mt-1">₹{item.price.toLocaleString()}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <button onClick={() => updateCartItem(item.product_id, item.quantity - 1)} className="p-1 hover:bg-[#F3EBE1] rounded" data-testid={`decrease-${item.product_id}`}>
-                          <Minus size={16} />
-                        </button>
-                        <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
-                        <button onClick={() => updateCartItem(item.product_id, item.quantity + 1)} className="p-1 hover:bg-[#F3EBE1] rounded" data-testid={`increase-${item.product_id}`}>
-                          <Plus size={16} />
-                        </button>
-                        <button onClick={() => updateCartItem(item.product_id, 0)} className="ml-auto p-1 text-[#C05A42] hover:bg-red-50 rounded" data-testid={`remove-${item.product_id}`}>
-                          <Trash2 size={16} />
-                        </button>
+                      <h4 className="font-medium text-[#1A2421] text-sm">{item.name}</h4>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-sm text-[#4A5D54]">₹{item.price.toLocaleString()}</span>
+                        <span className="text-xs text-[#4A5D54]/60">+{item.gst_rate || 5}% GST</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <button onClick={() => updateCartItem(item.product_id, item.quantity - 1)} className="p-1 hover:bg-[#F3EBE1] rounded" data-testid={`decrease-${item.product_id}`}><Minus size={14} /></button>
+                        <span className="text-sm font-medium w-5 text-center">{item.quantity}</span>
+                        <button onClick={() => updateCartItem(item.product_id, item.quantity + 1)} className="p-1 hover:bg-[#F3EBE1] rounded" data-testid={`increase-${item.product_id}`}><Plus size={14} /></button>
+                        <button onClick={() => updateCartItem(item.product_id, 0)} className="ml-auto p-1 text-[#C05A42] hover:bg-red-50 rounded" data-testid={`remove-${item.product_id}`}><Trash2 size={14} /></button>
                       </div>
                     </div>
                   </div>
                 ))}
-              </div>
-              <div className="border-t border-[#EAD8C3] pt-5 mt-4 space-y-3">
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Your name"
-                  className="w-full px-4 py-2.5 rounded-full bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33] transition-colors"
-                  data-testid="checkout-name-input"
-                />
-                <input
-                  type="email"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  placeholder="Your email (for order confirmation)"
-                  required
-                  className="w-full px-4 py-2.5 rounded-full bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33] transition-colors"
-                  data-testid="checkout-email-input"
-                />
-                <div className="flex justify-between items-center pt-2 pb-2">
-                  <span className="text-lg font-medium">Total</span>
-                  <span className="text-xl font-semibold heading-serif">₹{cart.total.toLocaleString()}</span>
+
+                {/* Customer Details */}
+                <div className="pt-3 space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-[#4A5D54]/60 font-medium">Contact & Delivery</p>
+                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Full name *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-name-input" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Email *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-email-input" />
+                    <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-phone-input" />
+                  </div>
+                  <input type="text" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} placeholder="Address (House/Street) *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-address-input" />
+                  <div className="grid grid-cols-3 gap-2">
+                    <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-city-input" />
+                    <input type="text" value={state} onChange={(e) => setState(e.target.value)} placeholder="State *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-state-input" />
+                    <input type="text" value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="PIN *" className="w-full px-4 py-2 rounded-lg bg-white border border-[#EAD8C3] text-sm text-[#1A2421] placeholder:text-[#4A5D54]/50 outline-none focus:border-[#1E3F33]" data-testid="checkout-pincode-input" />
+                  </div>
                 </div>
-                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-12 text-base" data-testid="checkout-btn">
+              </div>
+
+              {/* Price Summary */}
+              <div className="border-t border-[#EAD8C3] pt-4 mt-3 space-y-1">
+                <div className="flex justify-between text-sm text-[#4A5D54]">
+                  <span>Subtotal</span>
+                  <span>₹{(cart.subtotal || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm text-[#4A5D54]">
+                  <span>GST</span>
+                  <span>₹{(cart.gst || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 pb-2 border-t border-[#F3EBE1]">
+                  <span className="text-base font-medium">Total</span>
+                  <span className="text-lg font-semibold heading-serif">₹{(cart.total || 0).toLocaleString()}</span>
+                </div>
+                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-11 text-base" data-testid="checkout-btn">
                   {isLoading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
-                  Proceed to Checkout
+                  Pay ₹{(cart.total || 0).toLocaleString()}
                 </Button>
               </div>
             </>
