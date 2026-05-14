@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, useCallback, useRef } from "react";
+import React, { useState, useEffect, createContext, useContext, useCallback, useRef } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useNavigate, useSearchParams, useParams } from "react-router-dom";
 import axios from "axios";
@@ -231,7 +231,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                     <h4 className="font-medium text-[#1A2421] truncate">{product.name}</h4>
                     <p className="text-sm text-[#4A5D54] truncate">{product.description}</p>
                   </div>
-                  <span className="text-[#C05A42] font-semibold flex-shrink-0">₹{product.price}</span>
+                  <span className="text-[#C05A42] font-semibold flex-shrink-0">₹{product?.price}</span>
                 </button>
               ))}
             </div>
@@ -384,7 +384,7 @@ const CartSheet = ({ itemCount }) => {
                     <div className="flex-1">
                       <h4 className="font-medium text-[#1A2421] text-sm leading-tight">{item.name}</h4>
                       <div className="flex items-center gap-1">
-                        <span className="text-sm text-[#4A5D54]">₹{item.price.toLocaleString()}</span>
+                        <span className="text-sm text-[#4A5D54]">₹{item?.price?.toLocaleString()}</span>
                         <span className="text-xs text-[#4A5D54]/60">+{item.gst_rate || 5}%</span>
                       </div>
                       <div className="flex items-center gap-3 mt-1">
@@ -510,7 +510,7 @@ const HomeProductsSection = () => {
       <Link to={`/product/${product.id}`} className="hover:underline">
         <h3 className="text-xs md:text-sm font-medium text-[#1A2421] line-clamp-1">{product.name}</h3>
       </Link>
-      <p className="text-[#C05A42] text-xs md:text-sm font-semibold mt-1">₹{product.price}</p>
+      <p className="text-[#C05A42] text-xs md:text-sm font-semibold mt-1">₹{product?.price}</p>
       <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs md:text-sm w-full h-7 md:h-9">Add</Button>
     </div>
   );
@@ -534,7 +534,7 @@ const HomeProductsSection = () => {
                 </div>
                 <Link to={`/product/${product.id}`} className="hover:underline"><h3 className="heading-serif text-base md:text-xl font-semibold text-[#1A2421]">{product.name}</h3></Link>
                 <p className="text-[#4A5D54] text-xs md:text-sm mt-1 md:mt-2 line-clamp-2 hidden md:block">{product.description}</p>
-                <p className="text-[#C05A42] font-semibold text-sm md:text-base mt-2">₹{product.price.toLocaleString()}</p>
+                <p className="text-[#C05A42] font-semibold text-sm md:text-base mt-2">₹{product?.price?.toLocaleString()}</p>
                 <Button onClick={() => addToCart(product.id)} size="sm" className="mt-2 w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-xs md:text-sm h-8 md:h-9">Add to Cart</Button>
               </div>
             ))}
@@ -811,7 +811,7 @@ const ProductDetailPage = () => {
           <div className="flex flex-col justify-center">
             <p className="text-[#C05A42] text-sm font-medium tracking-widest uppercase mb-3">{product.category === 'home-decor' ? 'Home Decor' : product.category === 'beauty' ? 'Beauty' : product.category === 'pantry' ? 'Herbs & Spices' : 'Kitchen'}</p>
             <h1 className="heading-serif text-4xl md:text-5xl text-[#1A2421] mb-4" data-testid="product-detail-name">{product.name}</h1>
-            <p className="heading-serif text-3xl text-[#C05A42] mb-6" data-testid="product-detail-price">₹{product.price.toLocaleString()}</p>
+            <p className="heading-serif text-3xl text-[#C05A42] mb-6" data-testid="product-detail-price">₹{product?.price?.toLocaleString()}</p>
             <p className="text-[#4A5D54] text-lg leading-relaxed mb-8">{product.description}</p>
             
             <div className="flex gap-4 mb-8">
@@ -855,7 +855,7 @@ const ProductDetailPage = () => {
                   </div>
                   <div className="p-4">
                     <h3 className="font-medium text-[#1A2421] text-sm">{p.name}</h3>
-                    <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{p.price.toLocaleString()}</p>
+                    <p className="text-[#C05A42] text-sm font-semibold mt-1">₹{p?.price?.toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
@@ -932,7 +932,7 @@ const ShopPage = () => {
                   <Link to={`/product/${product.id}`}><h3 className="font-medium text-[#1A2421] hover:underline">{product.name}</h3></Link>
                   <p className="text-[#4A5D54] text-sm mt-1 line-clamp-2">{product.description}</p>
                   <div className="mt-3 flex items-center justify-between">
-                    <span className="text-[#C05A42] font-semibold">₹{product.price.toLocaleString()}</span>
+                    <span className="text-[#C05A42] font-semibold">₹{product?.price?.toLocaleString()}</span>
                     <Button onClick={() => addToCart(product.id)} size="sm" className="bg-[#1E3F33] hover:bg-[#152D24] rounded-full text-sm px-5 h-9">Add</Button>
                   </div>
                 </div>
@@ -1155,7 +1155,7 @@ const OrderHistoryPage = () => {
                           <span className="text-[#1A2421] font-medium">{item.name}</span>
                           <span className="text-[#4A5D54] text-sm ml-2">x{item.quantity}</span>
                         </div>
-                        <span className="text-[#C05A42] font-semibold">₹{(item.price * item.quantity).toLocaleString()}</span>
+                        <span className="text-[#C05A42] font-semibold">₹{((item?.price || 0) * (item?.quantity || 0)).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
