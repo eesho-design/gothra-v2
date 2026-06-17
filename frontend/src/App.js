@@ -41,6 +41,21 @@ const useCart = () => {
   return context;
 };
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [sessionId] = useState(() => {
@@ -100,6 +115,13 @@ const CartProvider = ({ children }) => {
   const checkout = async (customerEmail, customerName, customerPhone, addressLine, city, state, pincode) => {
     setIsLoading(true);
     try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded || !window.Razorpay) {
+        toast.error("Razorpay SDK failed to load. Please check your internet connection or disable ad-blockers.");
+        setIsLoading(false);
+        return;
+      }
+
       const response = await axios.post(`${API}/razorpay/create-order`, {
         session_id: sessionId,
         customer_email: customerEmail || "",
@@ -122,6 +144,7 @@ const CartProvider = ({ children }) => {
         prefill: {
           name: customerName || "",
           email: customerEmail || "",
+          contact: customerPhone || "",
         },
         theme: { color: "#1E3F33" },
         handler: async function (response) {
@@ -154,6 +177,9 @@ const CartProvider = ({ children }) => {
         toast.error(`Payment failed: ${response.error.description}`);
       });
       rzp.open();
+      // Instantly reset loading state after successful modal open
+      // to prevent the payment button from getting stuck.
+      setIsLoading(false);
     } catch (e) {
       toast.error("Failed to initiate checkout");
       setIsLoading(false);
@@ -339,12 +365,34 @@ const CartSheet = ({ itemCount }) => {
   const handleCheckout = () => {
     if (!customerName.trim()) { toast.error("Please enter your name"); return; }
     if (!customerEmail.trim() || !customerEmail.includes("@")) { toast.error("Please enter a valid email"); return; }
-    if (!customerPhone.trim() || customerPhone.trim().length < 10) { toast.error("Please enter a valid phone number"); return; }
+    
+    // Sanitize phone number (strip spaces, dashes, brackets, etc. to prevent SDK crash)
+    const sanitizedPhone = customerPhone.replace(/[^0-9+]/g, '');
+    if (!sanitizedPhone || sanitizedPhone.length < 10) { 
+      toast.error("Please enter a valid phone number (at least 10 digits)"); 
+      return; 
+    }
+    
     if (!addressLine.trim()) { toast.error("Please enter your address"); return; }
     if (!city.trim()) { toast.error("Please enter your city"); return; }
     if (!state.trim()) { toast.error("Please enter your state"); return; }
-    if (!pincode.trim() || pincode.trim().length < 5) { toast.error("Please enter a valid PIN code"); return; }
-    checkout(customerEmail.trim(), customerName.trim(), customerPhone.trim(), addressLine.trim(), city.trim(), state.trim(), pincode.trim());
+    
+    // Sanitize pincode (digits only)
+    const sanitizedPincode = pincode.replace(/\D/g, '');
+    if (!sanitizedPincode || sanitizedPincode.length < 5) { 
+      toast.error("Please enter a valid PIN code"); 
+      return; 
+    }
+    
+    checkout(
+      customerEmail.trim(), 
+      customerName.trim(), 
+      sanitizedPhone, 
+      addressLine.trim(), 
+      city.trim(), 
+      state.trim(), 
+      sanitizedPincode
+    );
   };
 
   return (
@@ -1286,6 +1334,7 @@ const AdminDashboard = () => {
                       <td className="px-5 py-4">
                         <div className="text-[#1A2421]">{order.customer_name || "Guest"}</div>
                         <div className="text-xs text-[#4A5D54]">{order.customer_email || "—"}</div>
+                        {order.customer_phone && <div className="text-xs text-[#4A5D54]/75 mt-0.5">{order.customer_phone}</div>}
                       </td>
                       <td className="px-5 py-4 text-[#4A5D54]">
                         {(order.items || []).map(i => i.name).join(", ").substring(0, 40) || "—"}
