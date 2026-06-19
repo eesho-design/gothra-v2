@@ -1453,6 +1453,11 @@ function App() {
     const handleRejection = (event) => {
       const reasonMsg = event.reason && (event.reason.message || String(event.reason));
       const stack = event.reason && event.reason.stack;
+      
+      if (reasonMsg && (reasonMsg.includes("failed_to_load_clerk_js") || reasonMsg.includes("Failed to load Clerk"))) {
+        alert("Fatal Error: Clerk authentication failed to load.\n\nReason: SSL Handshake Failure on clerk.gothra.org.\n\nPlease check your Clerk Dashboard -> Domain Settings to ensure the SSL certificate for clerk.gothra.org is active and verified, or update your Clerk Publishable Key in Netlify env vars to use the default subdomain key.");
+      }
+
       axios.post(`${API}/log-error`, {
         type: 'unhandled_rejection',
         reason: reasonMsg,
