@@ -117,21 +117,32 @@ const CartProvider = ({ children }) => {
     try {
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded || !window.Razorpay) {
+        alert("Razorpay SDK failed to load. If you are using an ad-blocker or Brave browser, please temporarily disable it to proceed with the payment.");
         toast.error("Razorpay SDK failed to load. Please check your internet connection or disable ad-blockers.");
         setIsLoading(false);
         return;
       }
 
-      const response = await axios.post(`${API}/razorpay/create-order`, {
-        session_id: sessionId,
-        customer_email: customerEmail || "",
-        customer_name: customerName || "",
-        customer_phone: customerPhone || "",
-        address_line: addressLine || "",
-        city: city || "",
-        state: state || "",
-        pincode: pincode || ""
-      });
+      let response;
+      try {
+        response = await axios.post(`${API}/razorpay/create-order`, {
+          session_id: sessionId,
+          customer_email: customerEmail || "",
+          customer_name: customerName || "",
+          customer_phone: customerPhone || "",
+          address_line: addressLine || "",
+          city: city || "",
+          state: state || "",
+          pincode: pincode || ""
+        });
+      } catch (postErr) {
+        const errDetail = postErr.response && postErr.response.data && postErr.response.data.error 
+          ? postErr.response.data.error 
+          : postErr.message;
+        alert("Failed to create order on server: " + errDetail);
+        throw postErr;
+      }
+
       const { order_id, amount, currency, key_id } = response.data;
 
       const options = {
@@ -159,6 +170,7 @@ const CartProvider = ({ children }) => {
             await fetchCart();
             window.location.href = `/checkout/success?razorpay=true&order_id=${response.razorpay_order_id}`;
           } catch (err) {
+            alert("Payment verification failed: " + err.message);
             toast.error("Payment verification failed. Please contact support.");
           }
           setIsLoading(false);
@@ -174,6 +186,7 @@ const CartProvider = ({ children }) => {
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", function (response) {
         setIsLoading(false);
+        alert(`Payment failed: ${response.error.description}`);
         toast.error(`Payment failed: ${response.error.description}`);
       });
       rzp.open();
@@ -181,6 +194,14 @@ const CartProvider = ({ children }) => {
       // to prevent the payment button from getting stuck.
       setIsLoading(false);
     } catch (e) {
+      alert("Failed to initiate checkout: " + e.message);
+      axios.post(`${API}/log-error`, {
+        type: 'checkout_error',
+        message: e.message,
+        stack: e.stack,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      }).catch(() => {});
       toast.error("Failed to initiate checkout");
       setIsLoading(false);
     }
@@ -363,36 +384,67 @@ const CartSheet = ({ itemCount }) => {
   const [pincode, setPincode] = useState("");
 
   const handleCheckout = () => {
-    if (!customerName.trim()) { toast.error("Please enter your name"); return; }
-    if (!customerEmail.trim() || !customerEmail.includes("@")) { toast.error("Please enter a valid email"); return; }
-    
-    // Sanitize phone number (strip spaces, dashes, brackets, etc. to prevent SDK crash)
-    const sanitizedPhone = customerPhone.replace(/[^0-9+]/g, '');
-    if (!sanitizedPhone || sanitizedPhone.length < 10) { 
-      toast.error("Please enter a valid phone number (at least 10 digits)"); 
-      return; 
+    try {
+      if (!customerName || !customerName.trim()) {
+        alert("Please enter your name");
+        toast.error("Please enter your name");
+        return;
+      }
+      if (!customerEmail || !customerEmail.trim() || !customerEmail.includes("@")) {
+        alert("Please enter a valid email address");
+        toast.error("Please enter a valid email");
+        return;
+      }
+      
+      const sanitizedPhone = customerPhone.replace(/[^0-9+]/g, '');
+      if (!sanitizedPhone || sanitizedPhone.length < 10) { 
+        alert("Please enter a valid 10-digit phone number");
+        toast.error("Please enter a valid phone number (at least 10 digits)"); 
+        return; 
+      }
+      
+      if (!addressLine || !addressLine.trim()) {
+        alert("Please enter your address");
+        toast.error("Please enter your address");
+        return;
+      }
+      if (!city || !city.trim()) {
+        alert("Please enter your city");
+        toast.error("Please enter your city");
+        return;
+      }
+      if (!state || !state.trim()) {
+        alert("Please enter your state");
+        toast.error("Please enter your state");
+        return;
+      }
+      
+      const sanitizedPincode = pincode.replace(/\D/g, '');
+      if (!sanitizedPincode || sanitizedPincode.length < 5) { 
+        alert("Please enter a valid PIN code");
+        toast.error("Please enter a valid PIN code"); 
+        return; 
+      }
+      
+      checkout(
+        customerEmail.trim(), 
+        customerName.trim(), 
+        sanitizedPhone, 
+        addressLine.trim(), 
+        city.trim(), 
+        state.trim(), 
+        sanitizedPincode
+      );
+    } catch (err) {
+      alert("Error in handleCheckout: " + err.message);
+      axios.post(`${API}/log-error`, {
+        type: 'handle_checkout_error',
+        message: err.message,
+        stack: err.stack,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      }).catch(() => {});
     }
-    
-    if (!addressLine.trim()) { toast.error("Please enter your address"); return; }
-    if (!city.trim()) { toast.error("Please enter your city"); return; }
-    if (!state.trim()) { toast.error("Please enter your state"); return; }
-    
-    // Sanitize pincode (digits only)
-    const sanitizedPincode = pincode.replace(/\D/g, '');
-    if (!sanitizedPincode || sanitizedPincode.length < 5) { 
-      toast.error("Please enter a valid PIN code"); 
-      return; 
-    }
-    
-    checkout(
-      customerEmail.trim(), 
-      customerName.trim(), 
-      sanitizedPhone, 
-      addressLine.trim(), 
-      city.trim(), 
-      state.trim(), 
-      sanitizedPincode
-    );
   };
 
   return (
@@ -1385,6 +1437,39 @@ const AdminPage = () => (
 const CLERK_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 function App() {
+  useEffect(() => {
+    const handleGlobalError = (event) => {
+      const errorMsg = event.message || (event.error && event.error.message) || String(event);
+      const stack = event.error && event.error.stack;
+      axios.post(`${API}/log-error`, {
+        type: 'window_error',
+        message: errorMsg,
+        stack: stack,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      }).catch(() => {});
+    };
+
+    const handleRejection = (event) => {
+      const reasonMsg = event.reason && (event.reason.message || String(event.reason));
+      const stack = event.reason && event.reason.stack;
+      axios.post(`${API}/log-error`, {
+        type: 'unhandled_rejection',
+        reason: reasonMsg,
+        stack: stack,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      }).catch(() => {});
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   return (
     <ClerkProvider publishableKey={CLERK_KEY}>
       <div className="App bg-[#FAF8F5] min-h-screen">
