@@ -1434,7 +1434,13 @@ const AdminPage = () => (
 );
 
 // Main App
-const CLERK_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
+const CLERK_KEY = (typeof import.meta !== "undefined" && import.meta.env?.VITE_CLERK_PUBLISHABLE_KEY) || process.env?.REACT_APP_CLERK_PUBLISHABLE_KEY;
+
+const AdminPageWrapper = () => (
+  <ClerkProvider publishableKey={CLERK_KEY}>
+    <AdminPage />
+  </ClerkProvider>
+);
 
 function App() {
   useEffect(() => {
@@ -1476,31 +1482,29 @@ function App() {
   }, []);
 
   return (
-    <ClerkProvider publishableKey={CLERK_KEY}>
-      <div className="App bg-[#FAF8F5] min-h-screen">
-        <BrowserRouter>
-          <CartProvider>
-            <Header />
-            <main>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/product/:productId" element={<ProductDetailPage />} />
-                <Route path="/category/:category" element={<ShopPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-                <Route path="/orders" element={<OrderHistoryPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-              </Routes>
-            </main>
-            <Footer />
-            <ScrollToTop />
-            <Toaster position="top-center" />
-          </CartProvider>
-        </BrowserRouter>
-      </div>
-    </ClerkProvider>
+    <div className="App bg-[#FAF8F5] min-h-screen">
+      <BrowserRouter>
+        <CartProvider>
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/product/:productId" element={<ProductDetailPage />} />
+              <Route path="/category/:category" element={<ShopPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+              <Route path="/orders" element={<OrderHistoryPage />} />
+              <Route path="/admin" element={<AdminPageWrapper />} />
+            </Routes>
+          </main>
+          <Footer />
+          <ScrollToTop />
+          <Toaster position="top-center" />
+        </CartProvider>
+      </BrowserRouter>
+    </div>
   );
 }
 
