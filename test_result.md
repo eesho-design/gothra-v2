@@ -101,3 +101,23 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+## user_problem_statement: "gothra.org The payment system is still not working"
+## backend:
+##   - task: "Razorpay Checkout Integration"
+##     implemented: true
+##     working: true
+##     file: "backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         - working: true
+##           agent: "main"
+##           comment: "Fixed bug where key_id was returned as undefined from the checkout order creation endpoint."
+##
+## metadata:
+##   created_by: "main_agent"
+##   version: "1.0"
+##   test_sequence: 1
+##   run_ui: false

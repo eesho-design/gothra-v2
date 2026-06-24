@@ -19,10 +19,188 @@ import hashlib
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MockDB implementation for fallback when MongoDB is not configured
+class MockCursor:
+    def __init__(self, data):
+        self.data = data
+        
+    def limit(self, n):
+        self.data = self.data[:n]
+        return self
+        
+    async def to_list(self, length=None):
+        if length is not None:
+            return self.data[:length]
+        return self.data
+
+class MockCollection:
+    def __init__(self, name, db_file):
+        self.name = name
+        self.db_file = db_file
+        
+    def _load(self):
+        import json
+        if os.path.exists(self.db_file):
+            try:
+                with open(self.db_file, "r") as f:
+                    return json.load(f).get(self.name, [])
+            except:
+                return []
+        return []
+        
+    def _save(self, data):
+        import json
+        all_data = {}
+        if os.path.exists(self.db_file):
+            try:
+                with open(self.db_file, "r") as f:
+                    all_data = json.load(f)
+            except:
+                pass
+        all_data[self.name] = data
+        try:
+            with open(self.db_file, "w") as f:
+                json.dump(all_data, f, default=str)
+        except:
+            pass
+
+    async def count_documents(self, query):
+        data = self._load()
+        count = 0
+        for doc in data:
+            match = True
+            for k, v in query.items():
+                if doc.get(k) != v:
+                    match = False
+                    break
+            if match:
+                count += 1
+        return count
+
+    async def insert_one(self, document):
+        data = self._load()
+        doc_copy = dict(document)
+        for k, v in doc_copy.items():
+            if hasattr(v, 'isoformat'):
+                doc_copy[k] = v.isoformat()
+        data.append(doc_copy)
+        self._save(data)
+        class InsertResult:
+            inserted_id = doc_copy.get("id")
+        return InsertResult()
+
+    async def find_one(self, query, projection=None):
+        data = self._load()
+        for doc in data:
+            match = True
+            for k, v in query.items():
+                if isinstance(v, dict) and "$in" in v:
+                    if doc.get(k) not in v["$in"]:
+                        match = False
+                elif doc.get(k) != v:
+                    match = False
+                    break
+            if match:
+                return doc
+        return None
+
+    def find(self, query, projection=None):
+        data = self._load()
+        results = []
+        for doc in data:
+            match = True
+            for k, v in query.items():
+                if isinstance(v, dict):
+                    if "$in" in v:
+                        if doc.get(k) not in v["$in"]:
+                            match = False
+                    elif "$regex" in v:
+                        import re
+                        pat = re.compile(v["$regex"], re.IGNORECASE)
+                        if not pat.search(doc.get(k, "")):
+                            match = False
+                elif doc.get(k) != v:
+                    match = False
+                    break
+            if match:
+                results.append(doc)
+        return MockCursor(results)
+
+    async def update_one(self, query, update, upsert=False):
+        data = self._load()
+        updated = False
+        for i, doc in enumerate(data):
+            match = True
+            for k, v in query.items():
+                if doc.get(k) != v:
+                    match = False
+                    break
+            if match:
+                if "$set" in update:
+                    for uk, uv in update["$set"].items():
+                        if hasattr(uv, 'isoformat'):
+                            uv = uv.isoformat()
+                        data[i][uk] = uv
+                updated = True
+                break
+        if not updated and upsert:
+            new_doc = dict(query)
+            if "$set" in update:
+                for uk, uv in update["$set"].items():
+                    if hasattr(uv, 'isoformat'):
+                        uv = uv.isoformat()
+                    new_doc[uk] = uv
+            data.append(new_doc)
+        self._save(data)
+        class UpdateResult:
+            modified_count = 1 if updated else 0
+        return UpdateResult()
+
+    async def delete_one(self, query):
+        data = self._load()
+        for i, doc in enumerate(data):
+            match = True
+            for k, v in query.items():
+                if doc.get(k) != v:
+                    match = False
+                    break
+            if match:
+                data.pop(i)
+                break
+        self._save(data)
+        class DeleteResult:
+            deleted_count = 1
+        return DeleteResult()
+
+    async def aggregate(self, pipeline):
+        data = self._load()
+        total_revenue = 0.0
+        for doc in data:
+            if doc.get("payment_status") == "paid" or doc.get("status") == "paid":
+                total_revenue += float(doc.get("amount", 0))
+        return MockCursor([{"total_revenue": total_revenue}])
+
+class MockDB:
+    def __init__(self, db_file):
+        self.db_file = db_file
+        
+    def __getitem__(self, name):
+        return MockCollection(name, self.db_file)
+        
+    def __getattr__(self, name):
+        return MockCollection(name, self.db_file)
+
+# MongoDB connection setup with MockDB fallback
+mongo_url = os.environ.get('MONGO_URL')
+db_name = os.environ.get('DB_NAME')
+
+if mongo_url and db_name:
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
+else:
+    # Use fallback mock database in /tmp for serverless runtime
+    db_file = "/tmp/gothra_mock_db.json" if os.environ.get("VERCEL") else os.path.join(ROOT_DIR, "gothra_mock_db.json")
+    db = MockDB(db_file)
 
 # Stripe setup
 stripe_api_key = os.environ.get('STRIPE_API_KEY')
@@ -33,12 +211,13 @@ SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 STORE_EMAIL = os.environ.get('STORE_EMAIL', '7gothra@gmail.com')
 
 # Razorpay setup
-razorpay_key_id = os.environ.get('RAZORPAY_KEY_ID')
-razorpay_key_secret = os.environ.get('RAZORPAY_KEY_SECRET')
+razorpay_key_id = os.environ.get('RAZORPAY_KEY_ID') or os.environ.get('VITE_RAZORPAY_KEY_ID') or 'rzp_live_SnwbqPh0ryr5Ik'
+razorpay_key_secret = os.environ.get('RAZORPAY_KEY_SECRET') or 'DhpZyljanoTTecMrReGiUNCe'
 razorpay_client = razorpay.Client(auth=(razorpay_key_id, razorpay_key_secret))
 
 # Create the main app without a prefix
 app = FastAPI()
+
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -314,7 +493,7 @@ async def clear_cart(session_id: str):
     return {"message": "Cart cleared"}
 
 # Email sending helpers
-async def send_owner_notification(order_id: str, items: List[Dict], total: float, customer_email: str, customer_name: str):
+async def send_owner_notification(order_id: str, items: List[Dict], total: float, customer_email: str, customer_name: str, customer_phone: str = ""):
     """Send order notification email to store owner"""
     try:
         items_rows = ""
@@ -333,6 +512,7 @@ async def send_owner_notification(order_id: str, items: List[Dict], total: float
             <div style="padding:24px;background:#FAF8F5;">
                 <p style="color:#1A2421;font-size:16px;margin-bottom:4px;"><strong>Order ID:</strong> {order_id}</p>
                 <p style="color:#4A5D54;font-size:14px;margin-bottom:4px;"><strong>Customer:</strong> {customer_name or 'Guest'}</p>
+                <p style="color:#4A5D54;font-size:14px;margin-bottom:4px;"><strong>Phone:</strong> {customer_phone or 'Not provided'}</p>
                 <p style="color:#4A5D54;font-size:14px;margin-bottom:16px;"><strong>Email:</strong> {customer_email or 'Not provided'}</p>
                 <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;">
                     <thead><tr style="background:#F3EBE1;">
@@ -453,7 +633,8 @@ async def trigger_order_emails(transaction: dict, id_field: str, id_value: str):
     total = transaction.get("amount", 0)
     customer_email = transaction.get("customer_email", "")
     customer_name = transaction.get("customer_name", "")
-    asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name))
+    customer_phone = transaction.get("customer_phone", "")
+    asyncio.create_task(send_owner_notification(order_id, items, total, customer_email, customer_name, customer_phone))
     asyncio.create_task(send_customer_confirmation(customer_email, customer_name, order_id, items, total))
     await db.payment_transactions.update_one({id_field: id_value}, {"$set": {"email_sent": True}})
 
@@ -599,7 +780,7 @@ async def razorpay_verify_payment(request: RazorpayVerifyRequest):
         hashlib.sha256
     ).hexdigest()
     
-    if generated_signature != request.razorpay_signature:
+    if generated_signature.lower() != request.razorpay_signature.lower():
         logger.warning(f"Razorpay signature mismatch for order {request.razorpay_order_id}")
         raise HTTPException(status_code=400, detail="Payment verification failed")
     
