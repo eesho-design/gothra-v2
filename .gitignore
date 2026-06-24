@@ -84,8 +84,18 @@ android-sdk/
 # Environment and credential files
 .env
 .env.*
+!frontend/.env.production
 *.env
 credentials.json
 *.pem
 *.key
 .credentials
+
+# Test screenshots and automation scripts
+*.png
+!frontend/public/**/*.png
+!frontend/src/**/*.png
+deploy_helper.py
+control_tabbit.py
+copy_prompt.py
+send_tabbit_prompt.py
