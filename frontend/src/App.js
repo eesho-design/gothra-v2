@@ -10,8 +10,10 @@ import { toast } from "sonner";
 import { Dialog, DialogContent } from "./components/ui/dialog";
 import { ClerkProvider, SignedIn, SignedOut, SignIn, UserButton, Protect } from "@clerk/clerk-react";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const BACKEND_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_BACKEND_URL) || 
+                    (typeof process !== "undefined" && process.env?.REACT_APP_BACKEND_URL) || 
+                    "";
+const API = BACKEND_URL ? `${BACKEND_URL}/api` : "/api";
 
 // Image Zoom Modal Component
 const ImageZoomModal = ({ isOpen, onClose, imageUrl, productName }) => {
