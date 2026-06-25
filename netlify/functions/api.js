@@ -103,7 +103,11 @@ class MongoCollectionMock {
     return this.data.find(item => {
       for (const key in query) {
         if (key.includes('.')) continue; // skip complex subdocument queries in findOne matching
-        if (item[key] !== query[key]) return false;
+        if (query[key] && typeof query[key] === 'object' && '$in' in query[key]) {
+          if (!query[key].$in.includes(item[key])) return false;
+        } else if (item[key] !== query[key]) {
+          return false;
+        }
       }
       return true;
     }) || null;
@@ -120,6 +124,8 @@ class MongoCollectionMock {
             return new RegExp(regex, 'i').test(val);
           });
           if (!matches) return false;
+        } else if (query[key] && typeof query[key] === 'object' && '$in' in query[key]) {
+          if (!query[key].$in.includes(item[key])) return false;
         } else if (item[key] !== query[key]) {
           return false;
         }
