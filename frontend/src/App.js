@@ -9,6 +9,7 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "./components/ui/dialog";
 import { ClerkProvider, SignedIn, SignedOut, SignIn, UserButton, Protect } from "@clerk/clerk-react";
+import { PRODUCTS } from "./products";
 
 const BACKEND_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_BACKEND_URL) || 
                     (typeof process !== "undefined" && process.env?.REACT_APP_BACKEND_URL) || 
@@ -585,7 +586,7 @@ const HomeAboutSection = () => (
 
 // Home Products Section
 const HomeProductsSection = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(PRODUCTS);
   const [zoomImage, setZoomImage] = useState(null);
   const { addToCart } = useCart();
 
@@ -971,8 +972,10 @@ const ProductDetailPage = () => {
 
 // Shop Page
 const ShopPage = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(() => {
+    return PRODUCTS;
+  });
+  const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const { addToCart } = useCart();
 

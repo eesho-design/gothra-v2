@@ -219,9 +219,9 @@ const mockDb = {
 
 let dbInstance = null;
 async function getDb() {
-  const mongoUrl = process.env.MONGO_URL;
+  const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URL || process.env.MONGODB_URI;
   if (!mongoUrl) {
-    console.log("MONGO_URL env variable not set! Using in-memory fallback database.");
+    console.log("MONGO_URL/MONGODB_URL env variable not set! Using in-memory fallback database.");
     return mockDb;
   }
   if (dbInstance) return dbInstance;
@@ -230,12 +230,20 @@ async function getDb() {
   await client.connect();
   dbInstance = client.db(dbName);
   
-  // Seed database with products if empty
-  const count = await dbInstance.collection('products').countDocuments({});
-  if (count === 0) {
-    await dbInstance.collection('products').insertMany(PRODUCTS);
-    console.log(`Seeded ${PRODUCTS.length} products`);
+  // Sync products to MongoDB so that any new or updated products (like pickles and punches) are correctly populated.
+  try {
+    for (const product of PRODUCTS) {
+      await dbInstance.collection('products').updateOne(
+        { id: product.id },
+        { $set: product },
+        { upsert: true }
+      );
+    }
+    console.log(`Synced ${PRODUCTS.length} products to database`);
+  } catch (syncErr) {
+    console.error("Failed to sync products to database:", syncErr);
   }
+  
   return dbInstance;
 }
 
