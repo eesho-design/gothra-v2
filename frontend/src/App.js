@@ -62,11 +62,16 @@ const loadRazorpayScript = () => {
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [sessionId] = useState(() => {
-    const stored = localStorage.getItem("gothra_session_id");
-    if (stored) return stored;
-    const newId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    localStorage.setItem("gothra_session_id", newId);
-    return newId;
+    try {
+      const stored = localStorage.getItem("gothra_session_id");
+      if (stored) return stored;
+      const newId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      localStorage.setItem("gothra_session_id", newId);
+      return newId;
+    } catch (err) {
+      console.warn("localStorage not available, using in-memory session ID:", err);
+      return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    }
   });
   const [isLoading, setIsLoading] = useState(false);
 
