@@ -13,8 +13,8 @@ import { PRODUCTS } from "./products";
 
 const BACKEND_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_BACKEND_URL) || 
                     (typeof process !== "undefined" && process.env?.REACT_APP_BACKEND_URL) || 
-                    "";
-const API = BACKEND_URL ? `${BACKEND_URL}/api` : "/api";
+                    "https://gothra-v2-api.onrender.com";
+const API = `${BACKEND_URL}/api`;
 
 // Image Zoom Modal Component
 const ImageZoomModal = ({ isOpen, onClose, imageUrl, productName }) => {
