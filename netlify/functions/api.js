@@ -859,6 +859,40 @@ router.post('/log-error', (req, res) => {
   res.json({ received: true });
 });
 
+router.get('/db-status', async (req, res) => {
+  const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URL || process.env.MONGODB_URI;
+  const isMock = !mongoUrl;
+  let isConnected = false;
+  let dbName = null;
+  let productsCount = 0;
+  
+  try {
+    const db = await getDb();
+    if (db) {
+      dbName = db.databaseName || (db.collection ? 'MockDB' : 'Unknown');
+      if (isMock) {
+        productsCount = MEMORY_DB.products.length;
+        isConnected = true;
+      } else {
+        productsCount = await db.collection('products').countDocuments({});
+        isConnected = true;
+      }
+    }
+  } catch (err) {
+    dbName = err.message;
+  }
+  
+  res.json({
+    timestamp: new Date().toISOString(),
+    commit: "3be2918-db-status-v1",
+    isMock,
+    dbName,
+    isConnected,
+    productsCount,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
+});
+
 router.get('/', (req, res) => {
   res.json({ message: 'GOTHRA API - Organic & Indigenous Products' });
 });
