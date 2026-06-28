@@ -1,4 +1,14 @@
 export const PRODUCTS = [
+    {
+        "id": "custom-product-id",
+        "name": "New Product Name",
+        "price": 500.00,
+        "description": "Brief description of the product and its benefits.",
+        "category": "beauty",
+        "image": "https://images.unsplash.com/photo-1585499193151-0f50d54c4e1c?q=80&w=500",
+        "image_url": "https://images.unsplash.com/photo-1585499193151-0f50d54c4e1c?q=80&w=500",
+        "gst_rate": 18
+    },
     // Jute Curtains (Home Decor) - 18% GST
     {"id": "prod-001", "name": "Subtlety", "description": "100% raw jute, self-embroidered with clay bead highlights available in sheer as well as dimouts. 7ft-2pcs", "price": 4600.00, "category": "home-decor", "image_url": "/images/8910apx5_Subtlety.png", "subcategory": "jute-curtains", "gst_rate": 18},
     {"id": "prod-002", "name": "Traditions Alive", "description": "Jute curtain with elephant mascot application and brass anklet beads. A surprisingly delightful encounter on raw jute background. 7ft-2pcs", "price": 5999.00, "category": "home-decor", "image_url": "/images/klf2iwua_Screenshot%202025-10-15%20221632.png", "subcategory": "jute-curtains", "gst_rate": 18},
