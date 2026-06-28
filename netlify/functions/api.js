@@ -75,7 +75,17 @@ const PRODUCTS = [
   {"id": "prod-035", "name": "Lime and Dates Pickle", "description": "100% Natural sweet and sour lime with dates pickle. 200gm/7.05oz", "price": 229.00, "category": "kitchen", "image_url": "/images/wsbueoco_lime and dates.jpeg", "gst_rate": 5},
   {"id": "prod-036", "name": "Water Apple Punch", "description": "Refreshing water apple concentrate. 500ml/16.9oz", "price": 599.00, "category": "kitchen", "image_url": "/images/bnp8i9vk_Water apple punch.png", "gst_rate": 5},
   {"id": "prod-037", "name": "Pomegranate Punch", "description": "Refreshing pomegranate concentrate made from fresh fruits. 500ml/16.9oz", "price": 510.00, "category": "kitchen", "image_url": "/images/8n7s9mhp_pom punch.png", "gst_rate": 5},
-  {"id": "prod-038", "name": "Naruneendi Sarbath", "description": "Traditional Kerala herbal drink concentrate. 500ml/16.9oz", "price": 130.00, "category": "kitchen", "image_url": "/images/4zhtlqeb_Naruneendi.png", "gst_rate": 5}
+  {"id": "prod-038", "name": "Naruneendi Sarbath", "description": "Traditional Kerala herbal drink concentrate. 500ml/16.9oz", "price": 130.00, "category": "kitchen", "image_url": "/images/4zhtlqeb_Naruneendi.png", "gst_rate": 5},
+  {
+    "id": "prod-040",
+    "name": "Terracotta Incense Burner",
+    "description": "Handcrafted terracotta incense holder made by local artisans. Perfect for spiritual wellness.",
+    "price": 450.00,
+    "category": "home-decor",
+    "image_url": "/images/terracotta_burner.png",
+    "subcategory": "planters",
+    "gst_rate": 18
+  },
 ];
 
 // In-memory collections simulation for serverless fallback
