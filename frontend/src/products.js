@@ -66,5 +66,16 @@ export const PRODUCTS = [
     "image_url": "/images/terracotta_burner.png",
     "subcategory": "planters",
     "gst_rate": 18
+  },
+  {
+    "id": "prod-041",
+    "name": "Organic Honey",
+    "price": 599,
+    "description": "Pure, ethically sourced forest honey.",
+    "category": "Herbs",
+    "image": "https://images.unsplash.com/photo-1585499193151-0f50d54c4e1c?q=80&w=500",
+    "image_url": "https://images.unsplash.com/photo-1585499193151-0f50d54c4e1c?q=80&w=500",
+    "inStock": true,
+    "gst_rate": 5
   }
 ];
