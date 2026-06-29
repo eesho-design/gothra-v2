@@ -281,7 +281,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                   className="w-full flex items-center gap-4 px-6 py-4 hover:bg-[#FAF8F5] transition-colors text-left border-b border-[#F3EBE1] last:border-0"
                   data-testid={`search-result-${product.id}`}
                 >
-                  <img src={product.image_url} alt={product.name} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={product.image_url} alt={product.name} loading="lazy" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-[#1A2421] truncate">{product.name}</h4>
                     <p className="text-sm text-[#4A5D54] truncate">{product.description}</p>
@@ -488,7 +488,7 @@ const CartSheet = ({ itemCount }) => {
               <div className="flex-1 overflow-auto space-y-2 pr-1 min-h-0">
                 {cart.items.map((item) => (
                   <div key={item.product_id} className="flex gap-3 p-2.5 bg-white rounded-lg" data-testid={`cart-item-${item.product_id}`}>
-                    <img src={item.image_url} alt={item.name} className="w-14 h-14 object-cover rounded" />
+                    <img src={item.image_url} alt={item.name} loading="lazy" className="w-14 h-14 object-cover rounded" />
                     <div className="flex-1">
                       <h4 className="font-medium text-[#1A2421] text-sm leading-tight">{item.name}</h4>
                       <div className="flex items-center gap-1">
@@ -610,7 +610,7 @@ const HomeProductsSection = () => {
   const SmallProductCard = ({ product }) => (
     <div className="bg-white p-2 md:p-3 text-center group" data-testid={`product-${product.id}`}>
       <div className="aspect-square overflow-hidden mb-2 md:mb-3 cursor-pointer relative rounded-lg" onClick={() => setZoomImage({ url: product.image_url, name: product.name })}>
-        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <img src={product.image_url} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
           <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
         </div>
@@ -635,7 +635,7 @@ const HomeProductsSection = () => {
             {juteCurtains.map((product) => (
               <div key={product.id} className="bg-white p-3 md:p-4 group">
                 <div className="aspect-[3/4] overflow-hidden mb-3 md:mb-4 cursor-pointer relative rounded-lg" onClick={() => setZoomImage({ url: product.image_url, name: product.name })}>
-                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={product.image_url} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={28} />
                   </div>
@@ -1035,7 +1035,7 @@ const ShopPage = () => {
               <div key={product.id} className="bg-white rounded-lg overflow-hidden group hover:shadow-lg transition-shadow" data-testid={`shop-product-${product.id}`}>
                 <Link to={`/product/${product.id}`}>
                   <div className="aspect-square overflow-hidden">
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={product.image_url} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                 </Link>
                 <div className="p-4">
