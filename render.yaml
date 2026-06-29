@@ -2,7 +2,7 @@ services:
   - type: web
     name: gothra-v2-api
     runtime: node
-    buildCommand: npm install && cd frontend && npm install && npm run build
+    buildCommand: npm install && cd frontend && npx yarn install && npx yarn build
     startCommand: node server.js
     plan: free
     envVars:
