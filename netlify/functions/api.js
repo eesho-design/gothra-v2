@@ -807,7 +807,7 @@ router.post('/razorpay/create-order', async (req, res) => {
     console.error("[RAZORPAY create-order error]", err?.response?.data || err?.message || err);
     const statusCode = err?.response?.statusCode || err?.statusCode || 500;
     const detail = err?.response?.data?.error?.description || err?.response?.data?.error?.code || err?.message || "Payment gateway error";
-    res.status(statusCode).json({ error: detail, code: err?.response?.data?.error?.code || err?.error?.code || "UNKNOWN", keys_configured: !!process.env.RAZORPAY_KEY_ID, key_prefix: (process.env.RAZORPAY_KEY_ID || "").substring(0, 10) });
+    res.status(statusCode).json({ error: detail, code: err?.response?.data?.error?.code || err?.error?.code || "UNKNOWN", keys_configured: !!process.env.RAZORPAY_KEY_ID, key_prefix: (process.env.RAZORPAY_KEY_ID || "").substring(0, 10), secret_prefix: (process.env.RAZORPAY_KEY_SECRET || "").substring(0, 8) });
   }
 });
 
