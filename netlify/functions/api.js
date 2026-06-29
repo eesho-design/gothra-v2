@@ -754,6 +754,10 @@ router.post('/webhook/stripe', async (req, res) => {
 
 router.post('/razorpay/create-order', async (req, res) => {
   try {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error("Razorpay payment configuration is missing from environment variables.");
+      return res.status(500).json({ error: "Payment configuration missing" });
+    }
     const db = await getDb();
     const { session_id, items: itemsInput, customer_email, customer_name, customer_phone, address_line, city, state, pincode } = req.body;
     let totals;
