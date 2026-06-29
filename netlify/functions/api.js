@@ -804,7 +804,9 @@ router.post('/razorpay/create-order', async (req, res) => {
     
     res.json({ order_id: order.id, amount: amountPaise, currency: 'INR', key_id: process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummy' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("[RAZORPAY create-order error]", err?.response?.data || err?.message || err);
+    const detail = err?.response?.data?.error?.description || err?.response?.data?.error?.code || err?.message || "Payment gateway error";
+    res.status(500).json({ error: detail, code: err?.response?.data?.error?.code || "UNKNOWN" });
   }
 });
 
@@ -836,7 +838,9 @@ router.post('/razorpay/verify-payment', async (req, res) => {
     
     res.json({ status: 'success', payment_id: razorpay_payment_id, order_id: razorpay_order_id });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("[RAZORPAY verify-payment error]", err?.response?.data || err?.message || err);
+    const detail = err?.response?.data?.error?.description || err?.message || "Payment verification error";
+    res.status(500).json({ error: detail });
   }
 });
 
