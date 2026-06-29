@@ -22,8 +22,8 @@ app.use((req, res, next) => {
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy123456789');
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummy',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_dummy'
+  key_id: (process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummy').trim(),
+  key_secret: (process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_dummy').trim()
 });
 
 const PRODUCTS = [
@@ -807,7 +807,7 @@ router.post('/razorpay/create-order', async (req, res) => {
     console.error("[RAZORPAY create-order error]", err?.response?.data || err?.message || err);
     const statusCode = err?.response?.statusCode || err?.statusCode || 500;
     const detail = err?.response?.data?.error?.description || err?.response?.data?.error?.code || err?.message || "Payment gateway error";
-    res.status(statusCode).json({ error: detail, code: err?.response?.data?.error?.code || err?.error?.code || "UNKNOWN", keys_configured: !!process.env.RAZORPAY_KEY_ID, key_prefix: (process.env.RAZORPAY_KEY_ID || "").substring(0, 10), secret_prefix: (process.env.RAZORPAY_KEY_SECRET || "").substring(0, 8) });
+    res.status(statusCode).json({ error: detail, code: err?.response?.data?.error?.code || err?.error?.code || "UNKNOWN", keys_configured: !!process.env.RAZORPAY_KEY_ID });
   }
 });
 
