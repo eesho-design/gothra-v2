@@ -2,7 +2,7 @@ services:
   - type: web
     name: gothra-v2-api
     runtime: node
-    buildCommand: npm install && cd frontend && npm install --legacy-peer-deps && npm run build
+    buildCommand: npm install && cd frontend && npm install --include=dev --legacy-peer-deps && npm run build
     startCommand: node server.js
     plan: free
     envVars:
