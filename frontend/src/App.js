@@ -166,6 +166,16 @@ const CartProvider = ({ children }) => {
           contact: customerPhone || "",
         },
         theme: { color: "#1E3F33" },
+        config: {
+          display: {
+            sequence: ["block.wallet"],
+            block: {
+              wallet: {
+                wallets: ["googlepay"]
+              }
+            }
+          }
+        },
         handler: async function (response) {
           try {
             await axios.post(`${API}/razorpay/verify-payment`, {
@@ -197,6 +207,10 @@ const CartProvider = ({ children }) => {
         alert(`Payment failed: ${response.error.description}`);
         toast.error(`Payment failed: ${response.error.description}`);
       });
+      // Blur any active input to dismiss the keyboard before Razorpay modal opens
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();
+      }
       rzp.open();
       // Instantly reset loading state after successful modal open
       // to prevent the payment button from getting stuck.
