@@ -811,6 +811,56 @@ router.post('/razorpay/create-order', async (req, res) => {
   }
 });
 
+// Direct UPI/GPay order — no Razorpay, just store order + generate UPI link
+router.post('/orders/create', async (req, res) => {
+  try {
+    const db = await getDb();
+    const { session_id, items: itemsInput, customer_email, customer_name, customer_phone, address_line, city, state, pincode } = req.body;
+    let totals;
+    if (itemsInput && itemsInput.length > 0) {
+      totals = calculateCartTotalsFromItems(itemsInput);
+    } else {
+      totals = await calculateCartTotals(db, session_id);
+    }
+    if (!totals || totals.items.length === 0) return res.status(400).json({ error: 'Cart is empty' });
+    
+    const amountPaise = Math.round(totals.total * 100);
+    if (amountPaise < 100) return res.status(400).json({ error: 'Minimum order amount is ₹1' });
+    
+    const orderId = `ORD${uuidv4().replace(/-/g, '').slice(0, 10).toUpperCase()}`;
+    
+    await db.collection('payment_transactions').insertOne({
+      id: uuidv4(),
+      order_id: orderId,
+      cart_session_id: session_id,
+      subtotal: totals.subtotal,
+      gst: totals.gst,
+      amount: totals.total,
+      currency: 'inr',
+      status: 'created',
+      payment_status: 'pending',
+      payment_method: 'upi',
+      items: totals.items,
+      customer_email: (customer_email || '').trim().toLowerCase(),
+      customer_name: customer_name || '',
+      customer_phone: customer_phone || '',
+      shipping_address: {
+        line: address_line || '',
+        city: city || '',
+        state: state || '',
+        pincode: pincode || ''
+      },
+      email_sent: false,
+      created_at: new Date().toISOString()
+    });
+    
+    res.json({ order_id: orderId, amount: amountPaise, currency: 'INR' });
+  } catch (err) {
+    console.error("[UPI create-order error]", err?.message || err);
+    res.status(500).json({ error: err?.message || "Failed to create order" });
+  }
+});
+
 router.post('/razorpay/verify-payment', async (req, res) => {
   try {
     const db = await getDb();

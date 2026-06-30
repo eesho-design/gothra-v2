@@ -130,7 +130,7 @@ const CartProvider = ({ children }) => {
 
       let response;
       try {
-        response = await axios.post(`${API}/razorpay/create-order`, {
+        response = await axios.post(`${API}/orders/create`, {
           session_id: sessionId,
           customer_email: customerEmail || "",
           customer_name: customerName || "",
@@ -144,49 +144,32 @@ const CartProvider = ({ children }) => {
         const errDetail = postErr.response && postErr.response.data && postErr.response.data.error 
           ? postErr.response.data.error 
           : postErr.message;
-        alert("Failed to create order on server: " + errDetail);
+        alert("Failed to create order: " + errDetail);
         throw postErr;
       }
 
-      const { order_id, amount, currency } = response.data;
+      const { order_id, amount } = response.data;
 
-      // Open GPay via UPI deep link (use iframe + fallback to keep page alive for polling)
-      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${(amount / 100).toFixed(2)}&cu=${currency}&tn=${order_id}`;
+      // Open GPay via UPI deep link — pure UPI, no Razorpay
+      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${(amount / 100).toFixed(2)}&cu=INR&tn=${order_id}`;
 
       // Create a hidden iframe to trigger UPI intent without navigating away
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
       iframe.src = upiLink;
       document.body.appendChild(iframe);
-      // Also redirect a hidden form as fallback
       setTimeout(() => {
         window.location.href = upiLink;
       }, 500);
 
       toast.success("Check your phone to complete payment via GPay/UPI");
 
-      // Poll for payment status
-      let verified = false;
-      for (let i = 0; i < 20; i++) {
-        await new Promise(r => setTimeout(r, 3000));
-        try {
-          const statusRes = await axios.get(`${API}/razorpay/check-order/${order_id}`);
-          if (statusRes.data.paid) {
-            verified = true;
-            break;
-          }
-        } catch (e) { /* ignore */ }
-      }
-
+      // No polling — payment goes directly to your bank via UPI VPA
+      // Order saved as pending — verify manually from bank statement
       setIsLoading(false);
-      if (verified) {
-        toast.success("Payment successful! Thank you for your order.");
-        await fetchCart();
-        window.location.href = `/checkout/success?order_id=${order_id}`;
-      } else {
-        toast("Payment pending", { description: "Complete payment via GPay or try again." });
-        window.location.href = `/checkout/success?order_id=${order_id}&pending=true`;
-      }
+      toast("Order placed! Payment is pending. Complete it in GPay.", { description: `Order: ${order_id}` });
+      await fetchCart();
+      window.location.href = `/checkout/success?order_id=${order_id}&pending=true`;
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {
