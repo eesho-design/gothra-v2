@@ -63,7 +63,7 @@ export const PRODUCTS = [
     "description": "Handcrafted terracotta incense holder made by local artisans. Perfect for spiritual wellness.",
     "price": 450.00,
     "category": "home-decor",
-    "image_url": "/images/terracotta_burner.jpg",
+    "image_url": "https://images.unsplash.com/photo-1585499193151-0f50d54c4e1c?q=80&w=500",
     "subcategory": "planters",
     "gst_rate": 18
   },
