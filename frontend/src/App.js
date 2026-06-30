@@ -45,7 +45,7 @@ const useCart = () => {
 };
 
 // Default UPI ID for direct GPay/UPI payments
-const UPI_ID = import.meta.env.VITE_UPI_ID || "9446014710@upi";
+const UPI_ID = import.meta.env.VITE_UPI_ID || "gothra859256.rzp@rxairtel";
 
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
