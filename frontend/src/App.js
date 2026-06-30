@@ -44,20 +44,8 @@ const useCart = () => {
   return context;
 };
 
-const loadRazorpayScript = () => {
-  return new Promise((resolve) => {
-    if (window.Razorpay) {
-      resolve(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
+// Default UPI ID for direct GPay/UPI payments
+const UPI_ID = import.meta.env.VITE_UPI_ID || "9446014710@upi";
 
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
@@ -121,14 +109,23 @@ const CartProvider = ({ children }) => {
   };
 
   const checkout = async (customerEmail, customerName, customerPhone, addressLine, city, state, pincode) => {
+    if (isLoading) return;
     setIsLoading(true);
     try {
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded || !window.Razorpay) {
-        alert("Razorpay SDK failed to load. If you are using an ad-blocker or Brave browser, please temporarily disable it to proceed with the payment.");
-        toast.error("Razorpay SDK failed to load. Please check your internet connection or disable ad-blockers.");
-        setIsLoading(false);
-        return;
+      // Save address to cart first
+      try {
+        await axios.post(`${API}/cart/address`, {
+          session_id: sessionId,
+          address_line: addressLine,
+          city: city,
+          state: state,
+          pincode: pincode,
+          customer_email: customerEmail,
+          customer_name: customerName,
+          customer_phone: customerPhone
+        });
+      } catch (addrErr) {
+        console.error("Failed to save address:", addrErr);
       }
 
       let response;
@@ -151,70 +148,39 @@ const CartProvider = ({ children }) => {
         throw postErr;
       }
 
-      const { order_id, amount, currency, key_id } = response.data;
+      const { order_id, amount, currency } = response.data;
 
-      const options = {
-        key: key_id,
-        amount: amount,
-        currency: currency,
-        name: "GOTHRA",
-        description: "Organic & Indigenous Products",
-        order_id: order_id,
-        prefill: {
-          name: customerName || "",
-          email: customerEmail || "",
-          contact: customerPhone || "",
-        },
-        theme: { color: "#1E3F33" },
-        config: {
-          display: {
-            sequence: ["block.wallet"],
-            block: {
-              wallet: {
-                wallets: ["googlepay"]
-              }
-            }
-          }
-        },
-        handler: async function (response) {
-          try {
-            await axios.post(`${API}/razorpay/verify-payment`, {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              session_id: sessionId
-            });
-            toast.success("Payment successful! Thank you for your order.");
-            await fetchCart();
-            window.location.href = `/checkout/success?razorpay=true&order_id=${response.razorpay_order_id}`;
-          } catch (err) {
-            alert("Payment verification failed: " + err.message);
-            toast.error("Payment verification failed. Please contact support.");
-          }
-          setIsLoading(false);
-        },
-        modal: {
-          ondismiss: function () {
-            setIsLoading(false);
-            toast("Payment cancelled", { description: "You can try again anytime." });
-          }
-        }
-      };
+      // Open GPay via UPI deep link
+      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${(amount / 100).toFixed(2)}&cu=${currency}&tn=${order_id}`;
 
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", function (response) {
-        setIsLoading(false);
-        alert(`Payment failed: ${response.error.description}`);
-        toast.error(`Payment failed: ${response.error.description}`);
-      });
-      // Blur any active input to dismiss the keyboard before Razorpay modal opens
-      if (document.activeElement && document.activeElement.blur) {
-        document.activeElement.blur();
+      // Try to open UPI app
+      window.location.href = upiLink;
+
+      // Wait and check if payment went through
+      toast.success("Check your phone to complete payment via GPay/UPI");
+
+      // Poll for payment status
+      let verified = false;
+      for (let i = 0; i < 20; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        try {
+          const statusRes = await axios.get(`${API}/razorpay/check-order/${order_id}`);
+          if (statusRes.data.paid) {
+            verified = true;
+            break;
+          }
+        } catch (e) { /* ignore */ }
       }
-      rzp.open();
-      // Instantly reset loading state after successful modal open
-      // to prevent the payment button from getting stuck.
+
       setIsLoading(false);
+      if (verified) {
+        toast.success("Payment successful! Thank you for your order.");
+        await fetchCart();
+        window.location.href = `/checkout/success?order_id=${order_id}`;
+      } else {
+        toast("Payment pending", { description: "Complete payment via GPay or try again." });
+        window.location.href = `/checkout/success?order_id=${order_id}&pending=true`;
+      }
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {

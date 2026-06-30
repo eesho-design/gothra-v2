@@ -845,6 +845,36 @@ router.post('/razorpay/verify-payment', async (req, res) => {
   }
 });
 
+// Check payment status for UPI/GPay orders (polled by frontend)
+router.get('/razorpay/check-order/:order_id', async (req, res) => {
+  try {
+    const db = await getDb();
+    const tx = await db.collection('payment_transactions').findOne({ razorpay_order_id: req.params.order_id });
+    if (!tx) return res.json({ paid: false, status: 'not_found' });
+
+    // Check Razorpay API for payment status
+    try {
+      const razorpayOrder = await razorpay.orders.fetch(req.params.order_id);
+      const status = razorpayOrder.status;
+      const isPaid = status === 'paid';
+      if (isPaid && tx.payment_status !== 'paid') {
+        // Update our DB if Razorpay says it's paid but we missed the webhook
+        await db.collection('payment_transactions').updateOne(
+          { razorpay_order_id: req.params.order_id },
+          { $set: { status: 'completed', payment_status: 'paid' } }
+        );
+      }
+      return res.json({ paid: isPaid, status, order_status: tx.payment_status });
+    } catch (razErr) {
+      // Fall back to local DB status
+      return res.json({ paid: tx.payment_status === 'paid', status: tx.payment_status });
+    }
+  } catch (err) {
+    console.error("[check-order error]", err?.message || err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/orders/lookup', async (req, res) => {
   try {
     const db = await getDb();
