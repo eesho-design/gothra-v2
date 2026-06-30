@@ -150,13 +150,19 @@ const CartProvider = ({ children }) => {
 
       const { order_id, amount, currency } = response.data;
 
-      // Open GPay via UPI deep link
+      // Open GPay via UPI deep link (use iframe + fallback to keep page alive for polling)
       const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${(amount / 100).toFixed(2)}&cu=${currency}&tn=${order_id}`;
 
-      // Try to open UPI app
-      window.location.href = upiLink;
+      // Create a hidden iframe to trigger UPI intent without navigating away
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = upiLink;
+      document.body.appendChild(iframe);
+      // Also redirect a hidden form as fallback
+      setTimeout(() => {
+        window.location.href = upiLink;
+      }, 500);
 
-      // Wait and check if payment went through
       toast.success("Check your phone to complete payment via GPay/UPI");
 
       // Poll for payment status
