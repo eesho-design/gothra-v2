@@ -151,7 +151,8 @@ const CartProvider = ({ children }) => {
       const { order_id, amount } = response.data;
 
       // Open GPay via UPI deep link — pure UPI, no Razorpay
-      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${(amount / 100).toFixed(2)}&cu=INR&tn=${order_id}`;
+      const amountInRupees = amount % 100 === 0 ? amount / 100 : (amount / 100).toFixed(2);
+      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amountInRupees}&cu=INR&tn=${order_id}`;
 
       // Create a hidden iframe to trigger UPI intent without navigating away
       const iframe = document.createElement('iframe');
@@ -163,6 +164,11 @@ const CartProvider = ({ children }) => {
       }, 500);
 
       toast.success("Check your phone to complete payment via GPay/UPI");
+
+      // Also save the UPI info so the success page can show manual instructions
+      sessionStorage.setItem("gothra_upi_id", UPI_ID);
+      sessionStorage.setItem("gothra_upi_amount", String(amountInRupees));
+      sessionStorage.setItem("gothra_order_id", order_id);
 
       // No polling — payment goes directly to your bank via UPI VPA
       // Order saved as pending — verify manually from bank statement
@@ -1148,6 +1154,15 @@ const CheckoutSuccessPage = () => {
             <div className="w-20 h-20 bg-[#C05A42] rounded-full flex items-center justify-center mx-auto"><X className="w-10 h-10 text-white" /></div>
             <h1 className="heading-serif text-4xl text-[#1A2421] mt-6">Payment Issue</h1>
             <p className="mt-4 text-[#4A5D54] text-lg">{status === "expired" ? "Your payment session has expired." : "There was an issue processing your payment."}</p>
+            <div className="mt-6 p-4 bg-[#F3EBE1] rounded-xl text-left text-sm">
+              <p className="font-medium text-[#1A2421] mb-2">Manually pay via GPay/UPI:</p>
+              <p className="text-[#4A5D54] mb-1">1. Open GPay on your phone</p>
+              <p className="text-[#4A5D54] mb-1">2. Tap "Pay" or "Send"</p>
+              <p className="text-[#4A5D54] mb-1">3. Enter UPI ID: <span className="font-mono font-bold text-[#1A2421]">academiclifeskills@oksbi</span></p>
+              <p className="text-[#4A5D54] mb-1">4. Enter amount shown on the checkout page</p>
+              <p className="text-[#4A5D54] mb-1">5. Add note with your Order ID</p>
+              <p className="text-[#4A5D54] mt-2 text-xs">After paying, we'll manually confirm your order.</p>
+            </div>
             <Link to="/"><Button className="mt-8 bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-8" data-testid="return-home-btn">Return to Shop</Button></Link>
           </>
         )}
