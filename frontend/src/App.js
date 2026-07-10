@@ -45,7 +45,7 @@ const useCart = () => {
 };
 
 // Default UPI ID for direct GPay/UPI payments
-const UPI_ID = import.meta.env.VITE_UPI_ID || "9446014710@iob";
+const UPI_ID = import.meta.env.VITE_UPI_ID || "academiclifeskills-1@oksbi";
 
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
@@ -1158,7 +1158,7 @@ const CheckoutSuccessPage = () => {
               <p className="font-medium text-[#1A2421] mb-2">Manually pay via GPay/UPI:</p>
               <p className="text-[#4A5D54] mb-1">1. Open GPay on your phone</p>
               <p className="text-[#4A5D54] mb-1">2. Tap "Pay" or "Send"</p>
-              <p className="text-[#4A5D54] mb-1">3. Enter UPI ID: <span className="font-mono font-bold text-[#1A2421]">9446014710@iob</span></p>
+              <p className="text-[#4A5D54] mb-1">3. Enter UPI ID: <span className="font-mono font-bold text-[#1A2421]">academiclifeskills-1@oksbi</span></p>
               <p className="text-[#4A5D54] mb-1">4. Enter amount shown on the checkout page</p>
               <p className="text-[#4A5D54] mb-1">5. Add note with your Order ID</p>
               <p className="text-[#4A5D54] mt-2 text-xs">After paying, we'll manually confirm your order.</p>
