@@ -153,45 +153,58 @@ const CartProvider = ({ children }) => {
 
       // Use Razorpay checkout for reliable payment
       const amountInPaise = Math.round(amount);
-      const options = {
-        key: "rzp_live_SnwbqPh0ryr5Ik",
-        amount: amountInPaise,
-        currency: "INR",
-        name: "GOTHRA",
-        description: `Order ${order_id}`,
-        order_id: order_id,
-        prefill: {
-          name: customerName || "",
-          email: customerEmail || "",
-          contact: customerPhone || "",
-          method: "upi"
-        },
-        theme: { color: "#1E3F33" },
-        handler: function (response) {
-          setIsLoading(false);
-          toast.success("Payment successful!");
-          fetchCart();
-          window.location.href = `/checkout/success?order_id=${response.razorpay_order_id}&razorpay=true`;
-        },
-        modal: {
-          ondismiss: function () {
-            setIsLoading(false);
-            // Offer UPI QR as fallback
-            const amountInRupees = amountInPaise % 100 === 0 ? amountInPaise / 100 : (amountInPaise / 100).toFixed(2);
-            sessionStorage.setItem("gothra_upi_id", UPI_ID);
-            sessionStorage.setItem("gothra_upi_amount", String(amountInRupees));
-            sessionStorage.setItem("gothra_order_id", order_id);
-            window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amountInPaise}`;
-          }
-        }
+      const goToUpiFallback = () => {
+        const amt = amountInPaise % 100 === 0 ? amountInPaise / 100 : (amountInPaise / 100).toFixed(2);
+        sessionStorage.setItem("gothra_upi_id", UPI_ID);
+        sessionStorage.setItem("gothra_upi_amount", String(amt));
+        sessionStorage.setItem("gothra_order_id", order_id);
+        window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amountInPaise}`;
       };
 
+      const openRazorpay = () => {
+        if (!window.Razorpay) {
+          toast.error("Payment gateway loading failed. Redirecting to UPI...");
+          goToUpiFallback();
+          return;
+        }
+        const rzp = new window.Razorpay({
+          key: "rzp_live_SnwbqPh0ryr5Ik",
+          amount: amountInPaise,
+          currency: "INR",
+          name: "GOTHRA",
+          description: `Order ${order_id}`,
+          order_id: order_id,
+          prefill: {
+            name: customerName || "",
+            email: customerEmail || "",
+            contact: customerPhone || ""
+          },
+          theme: { color: "#1E3F33" },
+          handler: function (res) {
+            setIsLoading(false);
+            toast.success("Payment successful!");
+            fetchCart();
+            window.location.href = `/checkout/success?order_id=${res.razorpay_order_id}&razorpay=true`;
+          },
+          modal: { ondismiss: function () { setIsLoading(false); goToUpiFallback(); } }
+        });
+        rzp.on("payment.failed", function (res) {
+          toast.error("Payment failed: " + (res.error?.description || "Unknown error"));
+        });
+        rzp.open();
+      };
+
+      // Ensure Razorpay script loaded
       setIsLoading(false);
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", function (response) {
-        toast.error("Payment failed: " + (response.error?.description || "Unknown error"));
-      });
-      rzp.open();
+      if (typeof window.Razorpay === "undefined") {
+        var s = document.createElement("script");
+        s.src = "https://checkout.razorpay.com/v1/checkout.js";
+        s.onload = openRazorpay;
+        s.onerror = function () { toast.error("Could not load payment gateway. Using UPI QR."); goToUpiFallback(); };
+        document.head.appendChild(s);
+      } else {
+        openRazorpay();
+      }
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {
