@@ -9,6 +9,7 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "./components/ui/dialog";
 import { ClerkProvider, SignedIn, SignedOut, SignIn, UserButton, Protect } from "@clerk/clerk-react";
+import UPIQrPayment from "./components/UPIQrPayment";
 import { PRODUCTS } from "./products";
 
 const BACKEND_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_BACKEND_URL) || 
@@ -150,32 +151,16 @@ const CartProvider = ({ children }) => {
 
       const { order_id, amount } = response.data;
 
-      // Open GPay via UPI deep link — pure UPI, no Razorpay
+      // Save order info for QR payment page
       const amountInRupees = amount % 100 === 0 ? amount / 100 : (amount / 100).toFixed(2);
-      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amountInRupees}&cu=INR&tn=${order_id}`;
-
-      // Create a hidden iframe to trigger UPI intent without navigating away
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = upiLink;
-      document.body.appendChild(iframe);
-      setTimeout(() => {
-        window.location.href = upiLink;
-      }, 500);
-
-      toast.success("Check your phone to complete payment via GPay/UPI");
-
-      // Also save the UPI info so the success page can show manual instructions
       sessionStorage.setItem("gothra_upi_id", UPI_ID);
       sessionStorage.setItem("gothra_upi_amount", String(amountInRupees));
       sessionStorage.setItem("gothra_order_id", order_id);
 
-      // No polling — payment goes directly to your bank via UPI VPA
-      // Order saved as pending — verify manually from bank statement
       setIsLoading(false);
-      toast("Order placed! Payment is pending. Complete it in GPay.", { description: `Order: ${order_id}` });
+      toast.success("Order created! Scan the QR code to pay via GPay/UPI");
       await fetchCart();
-      window.location.href = `/checkout/success?order_id=${order_id}&pending=true`;
+      window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {
@@ -1099,6 +1084,50 @@ const ContactPage = () => (
   </div>
 );
 
+// UPI QR Checkout Page — shows QR code after order creation
+const UPICheckoutPage = () => {
+  const [searchParams] = useSearchParams();
+  const orderId = searchParams.get("order_id");
+  const amount = searchParams.get("amount");
+  const navigate = useNavigate();
+
+  const handleOpenGpay = () => {
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amount ? (Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2)) : ''}&cu=INR&tn=${orderId}`;
+    window.location.href = upiLink;
+  };
+
+  return (
+    <div className="pt-28 pb-24 min-h-screen">
+      <div className="max-w-lg mx-auto px-6 text-center">
+        <h1 className="heading-serif text-3xl text-[#1A2421] mb-2">Complete Your Payment</h1>
+        <p className="text-[#4A5D54] mb-6">Scan the QR code with any UPI app to pay</p>
+
+        <UPIQrPayment amount={amount} orderId={orderId} />
+
+        <div className="mt-6 space-y-3">
+          <p className="text-sm text-[#4A5D54]">Or tap to open GPay directly on your phone:</p>
+          <button
+            onClick={handleOpenGpay}
+            className="w-full bg-[#1E3F33] hover:bg-[#152D24] text-white rounded-full py-3 px-6 text-sm transition-colors"
+          >
+            Open GPay
+          </button>
+        </div>
+
+        <div className="mt-8 text-xs text-[#4A5D54]/60 space-y-1">
+          <p>After paying, check your order status here:</p>
+          <button
+            onClick={() => navigate(`/checkout/success?order_id=${orderId}&pending=true`)}
+            className="text-[#1E3F33] underline hover:no-underline"
+          >
+            View Order Status
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Checkout Success Page
 const CheckoutSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -1154,15 +1183,7 @@ const CheckoutSuccessPage = () => {
             <div className="w-20 h-20 bg-[#C05A42] rounded-full flex items-center justify-center mx-auto"><X className="w-10 h-10 text-white" /></div>
             <h1 className="heading-serif text-4xl text-[#1A2421] mt-6">Payment Issue</h1>
             <p className="mt-4 text-[#4A5D54] text-lg">{status === "expired" ? "Your payment session has expired." : "There was an issue processing your payment."}</p>
-            <div className="mt-6 p-4 bg-[#F3EBE1] rounded-xl text-left text-sm">
-              <p className="font-medium text-[#1A2421] mb-2">Manually pay via GPay/UPI:</p>
-              <p className="text-[#4A5D54] mb-1">1. Open GPay on your phone</p>
-              <p className="text-[#4A5D54] mb-1">2. Tap "Pay" or "Send"</p>
-              <p className="text-[#4A5D54] mb-1">3. Enter UPI ID: <span className="font-mono font-bold text-[#1A2421]">academiclifeskills-1@oksbi</span></p>
-              <p className="text-[#4A5D54] mb-1">4. Enter amount shown on the checkout page</p>
-              <p className="text-[#4A5D54] mb-1">5. Add note with your Order ID</p>
-              <p className="text-[#4A5D54] mt-2 text-xs">After paying, we'll manually confirm your order.</p>
-            </div>
+            <UPIQrPayment amount={paymentData?.amount_total} orderId={razorpayOrderId || sessionId} />
             <Link to="/"><Button className="mt-8 bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-8" data-testid="return-home-btn">Return to Shop</Button></Link>
           </>
         )}
@@ -1489,6 +1510,7 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+              <Route path="/checkout/upi" element={<UPICheckoutPage />} />
               <Route path="/orders" element={<OrderHistoryPage />} />
               <Route path="/admin" element={<AdminPageWrapper />} />
             </Routes>
