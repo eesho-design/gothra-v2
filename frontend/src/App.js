@@ -131,7 +131,7 @@ const CartProvider = ({ children }) => {
 
       let response;
       try {
-        response = await axios.post(`${API}/orders/create`, {
+        response = await axios.post(`${API}/razorpay/create-order`, {
           session_id: sessionId,
           customer_email: customerEmail || "",
           customer_name: customerName || "",
@@ -151,16 +151,47 @@ const CartProvider = ({ children }) => {
 
       const { order_id, amount } = response.data;
 
-      // Save order info for QR payment page
-      const amountInRupees = amount % 100 === 0 ? amount / 100 : (amount / 100).toFixed(2);
-      sessionStorage.setItem("gothra_upi_id", UPI_ID);
-      sessionStorage.setItem("gothra_upi_amount", String(amountInRupees));
-      sessionStorage.setItem("gothra_order_id", order_id);
+      // Use Razorpay checkout for reliable payment
+      const amountInPaise = Math.round(amount);
+      const options = {
+        key: "rzp_live_SnwbqPh0ryr5Ik",
+        amount: amountInPaise,
+        currency: "INR",
+        name: "GOTHRA",
+        description: `Order ${order_id}`,
+        order_id: order_id,
+        prefill: {
+          name: customerName || "",
+          email: customerEmail || "",
+          contact: customerPhone || "",
+          method: "upi"
+        },
+        theme: { color: "#1E3F33" },
+        handler: function (response) {
+          setIsLoading(false);
+          toast.success("Payment successful!");
+          fetchCart();
+          window.location.href = `/checkout/success?order_id=${response.razorpay_order_id}&razorpay=true`;
+        },
+        modal: {
+          ondismiss: function () {
+            setIsLoading(false);
+            // Offer UPI QR as fallback
+            const amountInRupees = amountInPaise % 100 === 0 ? amountInPaise / 100 : (amountInPaise / 100).toFixed(2);
+            sessionStorage.setItem("gothra_upi_id", UPI_ID);
+            sessionStorage.setItem("gothra_upi_amount", String(amountInRupees));
+            sessionStorage.setItem("gothra_order_id", order_id);
+            window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amountInPaise}`;
+          }
+        }
+      };
 
       setIsLoading(false);
-      toast.success("Order created! Scan the QR code to pay via GPay/UPI");
-      await fetchCart();
-      window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        toast.error("Payment failed: " + (response.error?.description || "Unknown error"));
+      });
+      rzp.open();
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {
@@ -1090,22 +1121,29 @@ const UPICheckoutPage = () => {
   const orderId = searchParams.get("order_id");
   const amount = searchParams.get("amount");
   const navigate = useNavigate();
+  const [isMobile] = useState(() => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
 
   const handleOpenGpay = () => {
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amount ? (Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2)) : ''}&cu=INR&tn=${orderId}`;
-    window.location.href = upiLink;
+    const amt = amount ? (Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2)) : '';
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amt}&cu=INR&tn=${orderId}`;
+    // Use window.open for user-initiated gesture (trusted by UPI apps)
+    window.open(upiLink, '_blank');
   };
 
   return (
     <div className="pt-28 pb-24 min-h-screen">
       <div className="max-w-lg mx-auto px-6 text-center">
         <h1 className="heading-serif text-3xl text-[#1A2421] mb-2">Complete Your Payment</h1>
-        <p className="text-[#4A5D54] mb-6">Scan the QR code with any UPI app to pay</p>
+        <p className="text-[#4A5D54] mb-6">
+          {isMobile
+            ? "Copy the UPI ID below, open GPay, paste and pay"
+            : "Scan the QR code with any UPI app to pay"}
+        </p>
 
-        <UPIQrPayment amount={amount} orderId={orderId} />
+        <UPIQrPayment amount={amount} orderId={orderId} showCopyButton={true} />
 
         <div className="mt-6 space-y-3">
-          <p className="text-sm text-[#4A5D54]">Or tap to open GPay directly on your phone:</p>
+          <p className="text-sm text-[#4A5D54]">Or tap to open GPay directly:</p>
           <button
             onClick={handleOpenGpay}
             className="w-full bg-[#1E3F33] hover:bg-[#152D24] text-white rounded-full py-3 px-6 text-sm transition-colors"
