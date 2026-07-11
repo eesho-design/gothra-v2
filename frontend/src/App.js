@@ -129,9 +129,10 @@ const CartProvider = ({ children }) => {
         console.error("Failed to save address:", addrErr);
       }
 
+      // Direct UPI/GPay order — no Razorpay modal
       let response;
       try {
-        response = await axios.post(`${API}/razorpay/create-order`, {
+        response = await axios.post(`${API}/orders/create`, {
           session_id: sessionId,
           customer_email: customerEmail || "",
           customer_name: customerName || "",
@@ -142,69 +143,16 @@ const CartProvider = ({ children }) => {
           pincode: pincode || ""
         });
       } catch (postErr) {
-        const errDetail = postErr.response && postErr.response.data && postErr.response.data.error 
-          ? postErr.response.data.error 
-          : postErr.message;
+        const errDetail = postErr.response?.data?.error || postErr.message;
         alert("Failed to create order: " + errDetail);
         throw postErr;
       }
 
       const { order_id, amount } = response.data;
-
-      // Use Razorpay checkout for reliable payment
-      const amountInPaise = Math.round(amount);
-      const goToUpiFallback = () => {
-        const amt = amountInPaise % 100 === 0 ? amountInPaise / 100 : (amountInPaise / 100).toFixed(2);
-        sessionStorage.setItem("gothra_upi_id", UPI_ID);
-        sessionStorage.setItem("gothra_upi_amount", String(amt));
-        sessionStorage.setItem("gothra_order_id", order_id);
-        window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amountInPaise}`;
-      };
-
-      const openRazorpay = () => {
-        if (!window.Razorpay) {
-          toast.error("Payment gateway loading failed. Redirecting to UPI...");
-          goToUpiFallback();
-          return;
-        }
-        const rzp = new window.Razorpay({
-          key: "rzp_live_SnwbqPh0ryr5Ik",
-          amount: amountInPaise,
-          currency: "INR",
-          name: "GOTHRA",
-          description: `Order ${order_id}`,
-          order_id: order_id,
-          prefill: {
-            name: customerName || "",
-            email: customerEmail || "",
-            contact: customerPhone || ""
-          },
-          theme: { color: "#1E3F33" },
-          handler: function (res) {
-            setIsLoading(false);
-            toast.success("Payment successful!");
-            fetchCart();
-            window.location.href = `/checkout/success?order_id=${res.razorpay_order_id}&razorpay=true`;
-          },
-          modal: { ondismiss: function () { setIsLoading(false); goToUpiFallback(); } }
-        });
-        rzp.on("payment.failed", function (res) {
-          toast.error("Payment failed: " + (res.error?.description || "Unknown error"));
-        });
-        rzp.open();
-      };
-
-      // Ensure Razorpay script loaded
       setIsLoading(false);
-      if (typeof window.Razorpay === "undefined") {
-        var s = document.createElement("script");
-        s.src = "https://checkout.razorpay.com/v1/checkout.js";
-        s.onload = openRazorpay;
-        s.onerror = function () { toast.error("Could not load payment gateway. Using UPI QR."); goToUpiFallback(); };
-        document.head.appendChild(s);
-      } else {
-        openRazorpay();
-      }
+
+      // Redirect to UPI checkout page (QR + copy + GPay button)
+      window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {
@@ -1135,6 +1083,15 @@ const UPICheckoutPage = () => {
   const amount = searchParams.get("amount");
   const navigate = useNavigate();
   const [isMobile] = useState(() => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+
+  // Auto-open GPay on mobile when page loads
+  useEffect(() => {
+    if (isMobile && orderId && amount) {
+      const amt = Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2);
+      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amt}&cu=INR&tn=${orderId}`;
+      window.location.href = upiLink;
+    }
+  }, [isMobile, orderId, amount]);
 
   const handleOpenGpay = () => {
     const amt = amount ? (Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2)) : '';

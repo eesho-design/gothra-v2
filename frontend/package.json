@@ -59,6 +59,8 @@
   "homepage": "https://eesho-design.github.io/gothra-v2/",
   "scripts": {
     "start": "vite",
+    "env:check": "node scripts/vite-env-check.mjs",
+    "prebuild": "node scripts/vite-env-check.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
