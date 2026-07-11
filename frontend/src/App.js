@@ -129,10 +129,10 @@ const CartProvider = ({ children }) => {
         console.error("Failed to save address:", addrErr);
       }
 
-      // Direct UPI/GPay order — no Razorpay modal
+      // Create order via Razorpay (tracked on dashboard) — no modal
       let response;
       try {
-        response = await axios.post(`${API}/orders/create`, {
+        response = await axios.post(`${API}/razorpay/create-order`, {
           session_id: sessionId,
           customer_email: customerEmail || "",
           customer_name: customerName || "",
