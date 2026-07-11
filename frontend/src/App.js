@@ -1125,7 +1125,7 @@ const UPICheckoutPage = () => {
         <div className="mt-8 text-xs text-[#4A5D54]/60 space-y-1">
           <p>After paying, check your order status here:</p>
           <button
-            onClick={() => navigate(`/checkout/success?order_id=${orderId}&pending=true`)}
+            onClick={() => navigate(`/checkout/success?order_id=${orderId}&pending=true&session_id=${orderId}`)}
             className="text-[#1E3F33] underline hover:no-underline"
           >
             View Order Status

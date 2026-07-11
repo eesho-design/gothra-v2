@@ -899,7 +899,12 @@ router.post('/razorpay/verify-payment', async (req, res) => {
 router.get('/razorpay/check-order/:order_id', async (req, res) => {
   try {
     const db = await getDb();
-    const tx = await db.collection('payment_transactions').findOne({ razorpay_order_id: req.params.order_id });
+    const tx = await db.collection('payment_transactions').findOne({
+      $or: [
+        { razorpay_order_id: req.params.order_id },
+        { order_id: req.params.order_id }
+      ]
+    });
     if (!tx) return res.json({ paid: false, status: 'not_found' });
 
     // Check Razorpay API for payment status
