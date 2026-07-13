@@ -220,8 +220,33 @@ const CartProvider = ({ children }) => {
     }
   };
 
+  const checkoutUPI = async (customerEmail, customerName, customerPhone, addressLine, city, state, pincode) => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      try {
+        await axios.post(`${API}/cart/address`, {
+          session_id: sessionId,
+          address_line: addressLine, city, state, pincode,
+          customer_email: customerEmail, customer_name: customerName, customer_phone: customerPhone
+        });
+      } catch (_) {}
+
+      const resp = await axios.post(`${API}/razorpay/create-order`, {
+        session_id: sessionId, customer_email: customerEmail, customer_name: customerName,
+        customer_phone: customerPhone, address_line: addressLine, city, state, pincode
+      });
+      const { order_id, amount } = resp.data;
+      window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
+    } catch (e) {
+      alert("Checkout failed: " + (e.response?.data?.error || e.message));
+      toast.error("Checkout failed");
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <CartContext.Provider value={{ cart, sessionId, addToCart, updateCartItem, clearCart, checkout, isLoading, fetchCart }}>
+    <CartContext.Provider value={{ cart, sessionId, addToCart, updateCartItem, clearCart, checkout, checkoutUPI, isLoading, fetchCart }}>
       {children}
     </CartContext.Provider>
   );
@@ -387,7 +412,7 @@ const Header = () => {
 
 // Cart Sheet Component
 const CartSheet = ({ itemCount }) => {
-  const { cart, updateCartItem, checkout, isLoading } = useCart();
+  const { cart, updateCartItem, checkout, checkoutUPI, isLoading } = useCart();
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -457,6 +482,24 @@ const CartSheet = ({ itemCount }) => {
         url: window.location.href,
         userAgent: navigator.userAgent
       }).catch(() => {});
+    }
+  };
+
+  const handleUPICheckout = () => {
+    try {
+      if (!customerName || !customerName.trim()) { alert("Please enter your name"); toast.error("Please enter your name"); return; }
+      if (!customerEmail || !customerEmail.trim() || !customerEmail.includes("@")) { alert("Please enter a valid email address"); toast.error("Please enter a valid email"); return; }
+      const sanitizedPhone = customerPhone.replace(/[^0-9+]/g, '');
+      if (!sanitizedPhone || sanitizedPhone.length < 10) { alert("Please enter a valid 10-digit phone number"); toast.error("Please enter a valid phone number"); return; }
+      if (!addressLine || !addressLine.trim()) { alert("Please enter your address"); toast.error("Please enter your address"); return; }
+      if (!city || !city.trim()) { alert("Please enter your city"); toast.error("Please enter your city"); return; }
+      if (!state || !state.trim()) { alert("Please enter your state"); toast.error("Please enter your state"); return; }
+      const sanitizedPincode = pincode.replace(/\D/g, '');
+      if (!sanitizedPincode || sanitizedPincode.length < 5) { alert("Please enter a valid PIN code"); toast.error("Please enter a valid PIN code"); return; }
+      checkoutUPI(customerEmail.trim(), customerName.trim(), sanitizedPhone, addressLine.trim(), city.trim(), state.trim(), sanitizedPincode);
+    } catch (err) {
+      alert("Error: " + err.message);
+      toast.error("Checkout failed");
     }
   };
 
@@ -536,9 +579,13 @@ const CartSheet = ({ itemCount }) => {
                   </div>
                   <span className="text-base font-semibold heading-serif text-[#1A2421]">₹{(cart.total || 0).toLocaleString()}</span>
                 </div>
-                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-12 text-base mb-6" data-testid="checkout-btn">
+                <Button onClick={handleCheckout} disabled={isLoading} className="w-full bg-[#1E3F33] hover:bg-[#152D24] rounded-full h-12 text-base mb-2" data-testid="checkout-btn">
                   {isLoading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
                   Pay ₹{(cart.total || 0).toLocaleString()}
+                </Button>
+                <Button onClick={handleUPICheckout} disabled={isLoading} className="w-full bg-white hover:bg-[#FAF8F5] text-[#1A2421] border border-[#EAD8C3] rounded-full h-11 text-sm mb-6" data-testid="checkout-upi-btn">
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 10h18M3 14h18"/><path d="M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+                  GPay / UPI
                 </Button>
               </div>
             </>
