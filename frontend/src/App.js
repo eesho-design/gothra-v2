@@ -150,12 +150,16 @@ const CartProvider = ({ children }) => {
 
       const { order_id, amount, key_id } = response.data;
 
-      // Try loading Razorpay checkout script
+      // Load Razorpay checkout script if not already present
       if (!window.Razorpay) {
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         document.body.appendChild(script);
         await new Promise(r => { script.onload = r; script.onerror = r; });
+        // Poll for Razorpay to finish initializing (script loads async)
+        for (let i = 0; i < 50 && !window.Razorpay; i++) {
+          await new Promise(r => setTimeout(r, 100));
+        }
       }
 
       if (!window.Razorpay) {
