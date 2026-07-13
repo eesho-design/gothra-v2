@@ -10,7 +10,9 @@ export default function UPIQrPayment({ amount, orderId, businessName = "GOTHRA",
     ? (amount % 100 === 0 ? amount / 100 : (amount / 100).toFixed(2))
     : null;
   const tn = orderId || `order_${Date.now()}`;
-  const upiURI = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(businessName)}${amountInRupees ? `&am=${amountInRupees}` : ''}&cu=INR&tn=${tn}`;
+  // am must be in paise (smallest currency unit) per UPI spec
+  const upiAmount = amount || '';
+  const upiURI = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(businessName)}${upiAmount ? `&am=${upiAmount}` : ''}&cu=INR&tn=${tn}`;
 
   const copyUpiId = () => {
     navigator.clipboard.writeText(UPI_ID).then(() => {

@@ -129,7 +129,7 @@ const CartProvider = ({ children }) => {
         console.error("Failed to save address:", addrErr);
       }
 
-      // Create order via Razorpay (tracked on dashboard) — no modal
+      // Create order via Razorpay (tracked on dashboard)
       let response;
       try {
         response = await axios.post(`${API}/razorpay/create-order`, {
@@ -148,11 +148,60 @@ const CartProvider = ({ children }) => {
         throw postErr;
       }
 
-      const { order_id, amount } = response.data;
+      const { order_id, amount, key_id } = response.data;
+
+      // Try loading Razorpay checkout script
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        document.body.appendChild(script);
+        await new Promise(r => { script.onload = r; script.onerror = r; });
+      }
+
+      if (!window.Razorpay) {
+        // Fallback: redirect to UPI QR page
+        setIsLoading(false);
+        window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
+        return;
+      }
+
       setIsLoading(false);
 
-      // Redirect to UPI checkout page (QR + copy + GPay button)
-      window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
+      const rzpOptions = {
+        key: key_id,
+        amount: amount,
+        currency: 'INR',
+        name: 'GOTHRA',
+        description: 'Organic & Indigenous Products',
+        order_id: order_id,
+        prefill: {
+          name: customerName || '',
+          email: customerEmail || ''
+        },
+        readonly: { email: true },
+        handler: async function(paymentResponse) {
+          try {
+            await axios.post(`${API}/razorpay/verify-payment`, {
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+              session_id: sessionId
+            });
+            window.location.href = `/checkout/success?razorpay=true&order_id=${paymentResponse.razorpay_order_id}`;
+          } catch (e) {
+            alert('Payment verification failed. Please contact support at 7gothra@gmail.com');
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error('Payment cancelled. Your order is saved — you can try again.');
+          }
+        },
+        theme: { color: '#1E3F33' }
+      };
+
+      const rzp = new window.Razorpay(rzpOptions);
+      rzp.open();
     } catch (e) {
       alert("Failed to initiate checkout: " + e.message);
       axios.post(`${API}/log-error`, {
@@ -1087,15 +1136,13 @@ const UPICheckoutPage = () => {
   // Auto-open GPay on mobile when page loads
   useEffect(() => {
     if (isMobile && orderId && amount) {
-      const amt = Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2);
-      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amt}&cu=INR&tn=${orderId}`;
+      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amount}&cu=INR&tn=${orderId}`;
       window.location.href = upiLink;
     }
   }, [isMobile, orderId, amount]);
 
   const handleOpenGpay = () => {
-    const amt = amount ? (Number(amount) % 100 === 0 ? Number(amount) / 100 : (Number(amount) / 100).toFixed(2)) : '';
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amt}&cu=INR&tn=${orderId}`;
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amount || ''}&cu=INR&tn=${orderId}`;
     // Use window.open for user-initiated gesture (trusted by UPI apps)
     window.open(upiLink, '_blank');
   };
