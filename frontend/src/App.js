@@ -9,7 +9,6 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "./components/ui/dialog";
 import { ClerkProvider, SignedIn, SignedOut, SignIn, UserButton, Protect } from "@clerk/clerk-react";
-import UPIQrPayment from "./components/UPIQrPayment";
 import { PRODUCTS } from "./products";
 
 const BACKEND_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_BACKEND_URL) || 
@@ -163,9 +162,9 @@ const CartProvider = ({ children }) => {
       }
 
       if (!window.Razorpay) {
-        // Fallback: redirect to UPI QR page
+        // Fallback should never happen — razorpay script loads on demand
         setIsLoading(false);
-        window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
+        alert("Payment gateway failed to load. Please try again.");
         return;
       }
 
@@ -1173,64 +1172,6 @@ const ContactPage = () => (
   </div>
 );
 
-// UPI QR Checkout Page — shows QR code after order creation
-const UPICheckoutPage = () => {
-  const [searchParams] = useSearchParams();
-  const orderId = searchParams.get("order_id");
-  const amount = searchParams.get("amount");
-  const navigate = useNavigate();
-  const [isMobile] = useState(() => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
-
-  // Auto-open GPay on mobile when page loads
-  useEffect(() => {
-    if (isMobile && orderId && amount) {
-      const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amount}&cu=INR&tn=${orderId}`;
-      window.location.href = upiLink;
-    }
-  }, [isMobile, orderId, amount]);
-
-  const handleOpenGpay = () => {
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=GOTHRA&am=${amount || ''}&cu=INR&tn=${orderId}`;
-    // Use window.open for user-initiated gesture (trusted by UPI apps)
-    window.open(upiLink, '_blank');
-  };
-
-  return (
-    <div className="pt-28 pb-24 min-h-screen">
-      <div className="max-w-lg mx-auto px-6 text-center">
-        <h1 className="heading-serif text-3xl text-[#1A2421] mb-2">Complete Your Payment</h1>
-        <p className="text-[#4A5D54] mb-6">
-          {isMobile
-            ? "Copy the UPI ID below, open GPay, paste and pay"
-            : "Scan the QR code with any UPI app to pay"}
-        </p>
-
-        <UPIQrPayment amount={amount} orderId={orderId} showCopyButton={true} />
-
-        <div className="mt-6 space-y-3">
-          <p className="text-sm text-[#4A5D54]">Or tap to open GPay directly:</p>
-          <button
-            onClick={handleOpenGpay}
-            className="w-full bg-[#1E3F33] hover:bg-[#152D24] text-white rounded-full py-3 px-6 text-sm transition-colors"
-          >
-            Open GPay
-          </button>
-        </div>
-
-        <div className="mt-8 text-xs text-[#4A5D54]/60 space-y-1">
-          <p>After paying, check your order status here:</p>
-          <button
-            onClick={() => navigate(`/checkout/success?order_id=${orderId}&pending=true&session_id=${orderId}`)}
-            className="text-[#1E3F33] underline hover:no-underline"
-          >
-            View Order Status
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Checkout Success Page
 const CheckoutSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -1286,7 +1227,6 @@ const CheckoutSuccessPage = () => {
             <div className="w-20 h-20 bg-[#C05A42] rounded-full flex items-center justify-center mx-auto"><X className="w-10 h-10 text-white" /></div>
             <h1 className="heading-serif text-4xl text-[#1A2421] mt-6">Payment Issue</h1>
             <p className="mt-4 text-[#4A5D54] text-lg">{status === "expired" ? "Your payment session has expired." : "There was an issue processing your payment."}</p>
-            <UPIQrPayment amount={paymentData?.amount_total} orderId={razorpayOrderId || sessionId} />
             <Link to="/"><Button className="mt-8 bg-[#1E3F33] hover:bg-[#152D24] rounded-full px-8" data-testid="return-home-btn">Return to Shop</Button></Link>
           </>
         )}
@@ -1613,7 +1553,6 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-              <Route path="/checkout/upi" element={<UPICheckoutPage />} />
               <Route path="/orders" element={<OrderHistoryPage />} />
               <Route path="/admin" element={<AdminPageWrapper />} />
             </Routes>
