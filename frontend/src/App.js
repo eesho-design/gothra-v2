@@ -44,9 +44,6 @@ const useCart = () => {
   return context;
 };
 
-// Default UPI ID for direct GPay/UPI payments
-const UPI_ID = import.meta.env.VITE_UPI_ID || "academiclifeskills-1@oksbi";
-
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [sessionId] = useState(() => {
@@ -220,33 +217,8 @@ const CartProvider = ({ children }) => {
     }
   };
 
-  const checkoutUPI = async (customerEmail, customerName, customerPhone, addressLine, city, state, pincode) => {
-    if (isLoading) return;
-    setIsLoading(true);
-    try {
-      try {
-        await axios.post(`${API}/cart/address`, {
-          session_id: sessionId,
-          address_line: addressLine, city, state, pincode,
-          customer_email: customerEmail, customer_name: customerName, customer_phone: customerPhone
-        });
-      } catch (_) {}
-
-      const resp = await axios.post(`${API}/razorpay/create-order`, {
-        session_id: sessionId, customer_email: customerEmail, customer_name: customerName,
-        customer_phone: customerPhone, address_line: addressLine, city, state, pincode
-      });
-      const { order_id, amount } = resp.data;
-      window.location.href = `/checkout/upi?order_id=${order_id}&amount=${amount}`;
-    } catch (e) {
-      alert("Checkout failed: " + (e.response?.data?.error || e.message));
-      toast.error("Checkout failed");
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <CartContext.Provider value={{ cart, sessionId, addToCart, updateCartItem, clearCart, checkout, checkoutUPI, isLoading, fetchCart }}>
+    <CartContext.Provider value={{ cart, sessionId, addToCart, updateCartItem, clearCart, checkout, isLoading, fetchCart }}>
       {children}
     </CartContext.Provider>
   );
@@ -412,7 +384,7 @@ const Header = () => {
 
 // Cart Sheet Component
 const CartSheet = ({ itemCount }) => {
-  const { cart, updateCartItem, checkout, checkoutUPI, isLoading } = useCart();
+  const { cart, updateCartItem, checkout, isLoading } = useCart();
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -420,6 +392,8 @@ const CartSheet = ({ itemCount }) => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => { const mq = window.matchMedia("(max-width: 767px)"); setIsMobile(mq.matches); mq.addEventListener("change", e => setIsMobile(e.matches)); return () => mq.removeEventListener("change", () => {}); }, []);
 
   const handleCheckout = () => {
     try {
@@ -485,24 +459,6 @@ const CartSheet = ({ itemCount }) => {
     }
   };
 
-  const handleUPICheckout = () => {
-    try {
-      if (!customerName || !customerName.trim()) { alert("Please enter your name"); toast.error("Please enter your name"); return; }
-      if (!customerEmail || !customerEmail.trim() || !customerEmail.includes("@")) { alert("Please enter a valid email address"); toast.error("Please enter a valid email"); return; }
-      const sanitizedPhone = customerPhone.replace(/[^0-9+]/g, '');
-      if (!sanitizedPhone || sanitizedPhone.length < 10) { alert("Please enter a valid 10-digit phone number"); toast.error("Please enter a valid phone number"); return; }
-      if (!addressLine || !addressLine.trim()) { alert("Please enter your address"); toast.error("Please enter your address"); return; }
-      if (!city || !city.trim()) { alert("Please enter your city"); toast.error("Please enter your city"); return; }
-      if (!state || !state.trim()) { alert("Please enter your state"); toast.error("Please enter your state"); return; }
-      const sanitizedPincode = pincode.replace(/\D/g, '');
-      if (!sanitizedPincode || sanitizedPincode.length < 5) { alert("Please enter a valid PIN code"); toast.error("Please enter a valid PIN code"); return; }
-      checkoutUPI(customerEmail.trim(), customerName.trim(), sanitizedPhone, addressLine.trim(), city.trim(), state.trim(), sanitizedPincode);
-    } catch (err) {
-      alert("Error: " + err.message);
-      toast.error("Checkout failed");
-    }
-  };
-
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -516,7 +472,7 @@ const CartSheet = ({ itemCount }) => {
           )}
         </button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md bg-[#FAF8F5] flex flex-col p-4 pt-6 pb-6 max-h-[100dvh]">
+      <SheetContent side={isMobile ? "bottom" : "right"} className={isMobile ? "w-full max-h-[85dvh] rounded-t-2xl bg-[#FAF8F5] flex flex-col p-4 pt-6 pb-10" : "w-full sm:max-w-md bg-[#FAF8F5] flex flex-col p-4 pt-6 pb-6 max-h-[100dvh]"}>
         <SheetHeader className="flex-shrink-0">
           <SheetTitle className="heading-serif text-2xl">Your Cart</SheetTitle>
         </SheetHeader>
