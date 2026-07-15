@@ -392,6 +392,16 @@ const CartSheet = ({ itemCount }) => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
+  // Preload Razorpay script when cart opens
+  useEffect(() => {
+    const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+    if (!existing && !window.Razorpay) {
+      const s = document.createElement('script');
+      s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      s.async = true;
+      document.head.appendChild(s);
+    }
+  }, []);
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => { const mq = window.matchMedia("(max-width: 767px)"); setIsMobile(mq.matches); mq.addEventListener("change", e => setIsMobile(e.matches)); return () => mq.removeEventListener("change", () => {}); }, []);
 
