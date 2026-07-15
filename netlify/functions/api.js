@@ -240,6 +240,10 @@ async function getDb() {
   
   // Sync products to MongoDB so that any new or updated products (like pickles and punches) are correctly populated.
   try {
+    const validIds = PRODUCTS.map(p => p.id);
+    // Delete stale products no longer in the catalog (e.g. removed placeholders)
+    await dbInstance.collection('products').deleteMany({ id: { $nin: validIds } });
+    // Upsert current products
     for (const product of PRODUCTS) {
       await dbInstance.collection('products').updateOne(
         { id: product.id },
@@ -247,7 +251,7 @@ async function getDb() {
         { upsert: true }
       );
     }
-    console.log(`Synced ${PRODUCTS.length} products to database`);
+    console.log(`Synced ${PRODUCTS.length} products to database (stale removed)`);
   } catch (syncErr) {
     console.error("Failed to sync products to database:", syncErr);
   }

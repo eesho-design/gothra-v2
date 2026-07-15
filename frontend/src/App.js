@@ -621,7 +621,7 @@ const ScrollToTop = () => {
 const HeroSection = () => (
   <section className="pt-20 relative" data-testid="hero-section">
     <div className="w-full">
-      <img src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" alt="GOTHRA" className="w-full h-auto object-contain" />
+      <img src="/images/vu81syzr_gothra.webp" alt="GOTHRA" className="w-full h-auto object-contain" fetchpriority="high" />
     </div>
   </section>
 );
@@ -1113,7 +1113,7 @@ const AboutPage = () => (
   <div className="pt-20" data-testid="about-page">
     <section className="relative h-[40vh] flex items-center justify-center">
       <div className="absolute inset-0 z-0">
-        <img src="https://customer-assets.emergentagent.com/job_earth-commerce-2/artifacts/vu81syzr_gothra.jpeg" alt="GOTHRA" className="w-full h-full object-cover" />
+        <img src="/images/vu81syzr_gothra.webp" alt="GOTHRA" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-[#1A2421]/50"></div>
       </div>
       <h1 className="heading-serif text-5xl md:text-6xl text-white relative z-10">About Us</h1>
