@@ -15,6 +15,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-clerk': ['@clerk/clerk-react'],
+          'vendor-rest': ['@radix-ui/react-dialog', '@radix-ui/react-slot', 'sonner', 'lucide-react'],
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
   },
