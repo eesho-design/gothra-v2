@@ -180,7 +180,8 @@ const CartProvider = ({ children }) => {
         order_id: order_id,
         prefill: {
           name: customerName || '',
-          email: customerEmail || ''
+          email: customerEmail || '',
+          contact: customerPhone || ''
         },
         readonly: { email: true },
         handler: async function(paymentResponse) {
