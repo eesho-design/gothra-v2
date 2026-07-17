@@ -2,7 +2,7 @@ import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const UPI_ID = typeof import.meta !== "undefined" && import.meta.env?.VITE_UPI_ID 
-  || "academiclifeskills-1@oksbi";
+  || "gpay-12196746481@okbizaxis";
 
 export default function UPIQrPayment({ amount, orderId, businessName = "GOTHRA", showCopyButton = true }) {
   const [copied, setCopied] = React.useState(false);

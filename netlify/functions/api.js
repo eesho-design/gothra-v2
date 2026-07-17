@@ -22,8 +22,8 @@ app.use((req, res, next) => {
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy123456789');
 const razorpay = new Razorpay({
-  key_id: (process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummy').trim(),
-  key_secret: (process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_dummy').trim()
+  key_id: (process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_SnwbqPh0ryr5Ik').trim(),
+  key_secret: (process.env.RAZORPAY_KEY_SECRET || 'DhpZyljanoTTecMrReGiUNCe').trim()
 });
 
 const PRODUCTS = [
