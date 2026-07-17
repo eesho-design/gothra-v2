@@ -210,8 +210,10 @@ resend.api_key = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 STORE_EMAIL = os.environ.get('STORE_EMAIL', '7gothra@gmail.com')
 
-# Razorpay setup
-razorpay_key_id = os.environ.get('RAZORPAY_KEY_ID') or os.environ.get('VITE_RAZORPAY_KEY_ID') or 'rzp_live_SnwbqPh0ryr5Ik'
+# Razorpay setup — live production keys
+# NOTE: Render dashboard RAZORPAY_KEY_ID env var may be set to test key;
+# hardcode live key to ensure production mode. Update when Render env is fixed.
+razorpay_key_id = 'rzp_live_SnwbqPh0ryr5Ik'
 razorpay_key_secret = os.environ.get('RAZORPAY_KEY_SECRET') or 'DhpZyljanoTTecMrReGiUNCe'
 razorpay_client = razorpay.Client(auth=(razorpay_key_id, razorpay_key_secret))
 
