@@ -130,6 +130,7 @@ const CartProvider = ({ children }) => {
       try {
         response = await axios.post(`${API}/razorpay/create-order`, {
           session_id: sessionId,
+          items: cart.items.map(i => ({ product_id: i.product_id, quantity: i.quantity })),
           customer_email: customerEmail || "",
           customer_name: customerName || "",
           customer_phone: customerPhone || "",
@@ -399,6 +400,8 @@ const CartSheet = ({ itemCount }) => {
       const s = document.createElement('script');
       s.src = 'https://checkout.razorpay.com/v1/checkout.js';
       s.async = true;
+      s.onload = () => console.log('[GOTHRA] Razorpay script loaded successfully');
+      s.onerror = () => console.error('[GOTHRA] Razorpay script FAILED to load — check network/CSP');
       document.head.appendChild(s);
     }
   }, []);
